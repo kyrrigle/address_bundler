@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "address_bundler"
+version = "0.1.0"
+description = "Sort addresses into geographically grouped bundles"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+authors = [
+  { name = "Your Name", email = "you@example.com" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  # "requests>=2.0",
+  "docopt",
+  "icecream",
+  "python-dotenv",
+  "scikit-learn",
+  "numpy",
+  "geopy",
+  "pdfplumber",
+  "fuzzywuzzy",
+  "prettytable",
+  "reportlab",
+  "peewee",
+  "PyYAML",
+  "tqdm",
+  "py-staticmaps[cairo]",
+  "Pillow<10.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*"]
+
+[project.scripts]
+ab = "address_bundler.main:main"
+address-bundler = "address_bundler.main:main"
