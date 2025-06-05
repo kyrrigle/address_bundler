@@ -66,8 +66,8 @@ class Project:
 
     DEFAULT_CONFIG = {
         "school_name": "",
-        "cluster_count": 5,
         "bundle_size": 20,
+        "min_bundle_size": 5,
     }
 
     def __init__(self, name: str, projects_root: str):
@@ -119,23 +119,76 @@ class Project:
         if school_name:
             self.config["school_name"] = school_name
 
-        # Cluster count
-        current_clusters = self.config.get("cluster_count", 5)
-        cluster_input = input(f"Cluster count [{current_clusters}]: ").strip()
-        if cluster_input:
-            try:
-                self.config["cluster_count"] = int(cluster_input)
-            except ValueError:
-                print("Invalid number. Keeping previous value.")
-
         # Bundle size
         current_bundle = self.config.get("bundle_size", 20)
-        bundle_input = input(f"Bundle size [{current_bundle}]: ").strip()
-        if bundle_input:
+        while True:
+            bundle_input = input(f"Bundle size [{current_bundle}]: ").strip()
+            if not bundle_input:
+                break
             try:
-                self.config["bundle_size"] = int(bundle_input)
+                bundle_size = int(bundle_input)
+                if bundle_size <= 0:
+                    print("Bundle size must be greater than 0. Please try again.")
+                    continue
+                self.config["bundle_size"] = bundle_size
+                break
             except ValueError:
-                print("Invalid number. Keeping previous value.")
+                print("Invalid number. Please enter a valid integer.")
+
+        # Min bundle size
+        current_min_bundle = self.config.get("min_bundle_size", 5)
+        while True:
+            min_bundle_input = input(f"Min bundle size [{current_min_bundle}]: ").strip()
+            if not min_bundle_input:
+                break
+            try:
+                min_bundle_size = int(min_bundle_input)
+                if min_bundle_size <= 0:
+                    print("Min bundle size must be greater than 0. Please try again.")
+                    continue
+                if min_bundle_size >= self.config["bundle_size"]:
+                    print(f"Min bundle size ({min_bundle_size}) must be less than bundle size ({self.config['bundle_size']}). Please try again.")
+                    continue
+                self.config["min_bundle_size"] = min_bundle_size
+                break
+            except ValueError:
+                print("Invalid number. Please enter a valid integer.")
+
+        # Final validation to ensure min_bundle_size < bundle_size
+        if self.config["min_bundle_size"] >= self.config["bundle_size"]:
+            print(f"\nWarning: Min bundle size ({self.config['min_bundle_size']}) must be less than bundle size ({self.config['bundle_size']}).")
+            print("Please re-enter these values:")
+            
+            # Re-prompt for bundle size
+            while True:
+                bundle_input = input(f"Bundle size [{self.config['bundle_size']}]: ").strip()
+                if not bundle_input:
+                    bundle_input = str(self.config['bundle_size'])
+                try:
+                    bundle_size = int(bundle_input)
+                    if bundle_size <= 0:
+                        print("Bundle size must be greater than 0. Please try again.")
+                        continue
+                    self.config["bundle_size"] = bundle_size
+                    break
+                except ValueError:
+                    print("Invalid number. Please enter a valid integer.")
+            
+            # Re-prompt for min bundle size
+            while True:
+                min_bundle_input = input(f"Min bundle size [must be less than {self.config['bundle_size']}]: ").strip()
+                try:
+                    min_bundle_size = int(min_bundle_input)
+                    if min_bundle_size <= 0:
+                        print("Min bundle size must be greater than 0. Please try again.")
+                        continue
+                    if min_bundle_size >= self.config["bundle_size"]:
+                        print(f"Min bundle size ({min_bundle_size}) must be less than bundle size ({self.config['bundle_size']}). Please try again.")
+                        continue
+                    self.config["min_bundle_size"] = min_bundle_size
+                    break
+                except ValueError:
+                    print("Invalid number. Please enter a valid integer.")
 
         self.save_config()
         print("Configuration saved to project.yaml")

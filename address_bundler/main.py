@@ -55,10 +55,7 @@ generate
     The generate command by itself will first create the maps and then the pdfs
 """
 
-import os
 import sys
-import csv
-import re
 import logging
 
 

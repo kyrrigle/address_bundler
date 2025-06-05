@@ -26,9 +26,9 @@ _PREDEFINED_COLORS = [
 
 def _index_to_color(idx: int) -> staticmaps.Color:
     """
-    Return a visually distinct color for the *idx*-th cluster.
+    Return a visually distinct color for an integer index.
 
-    * For the first few clusters we reuse a fixed palette for clarity.
+    * For the first few indices we reuse a fixed palette for clarity.
     * Beyond that we generate colors in HSV space and convert to RGB.
     """
     if idx < len(_PREDEFINED_COLORS):
@@ -55,11 +55,10 @@ def _safe_filename(name: str) -> str:
 # --------------------------------------------------------------------------- #
 def generate_maps(width: int = 1200, height: int = 800) -> None:
     """
-    Create png maps visualising student locations:
+    Generate map PNGs visualising student locations:
 
-    • *clusters.png* – all clusters, each with a unique color.
-    • *cluster_<cluster_key>.png* – one image per cluster, bundles in unique colors.
-    • *bundle_<bundle_key>.png* – one image per bundle (uniform color).
+    • **master.png** – all students, colour-coded by *bundle_key*.
+    • **bundle_<bundle_key>.png** – one image per bundle (uniform colour).
     """
     # ------------------------------------------------------------------ #
     # 1. Gather data from the database
@@ -75,79 +74,49 @@ def generate_maps(width: int = 1200, height: int = 800) -> None:
         print("No geocoded students found – nothing to map.")
         return
 
-    clusters: Dict[str, List[Student]] = {}
-    for s in students:
-        key = s.cluster_key or "unclustered"
-        clusters.setdefault(key, []).append(s)
-
-    # ------------------------------------------------------------------ #
-    # 2. Build the static map containing *all* clusters
-    # ------------------------------------------------------------------ #
-    ctx = staticmaps.Context()
-    ctx.set_tile_provider(staticmaps.tile_provider_OSM)
-
-    for idx, (cluster_key, members) in enumerate(clusters.items()):
-        color = _index_to_color(idx)
-        for student in members:
-            coord = staticmaps.create_latlng(student.latitude, student.longitude)
-            ctx.add_object(staticmaps.Marker(coord, color=color, size=12))
-
-    # Ensure the resulting image frames all points nicely
-    image = ctx.render_pillow(width, height)
-
-    # ------------------------------------------------------------------ #
-    # 3. Determine output path and save
-    # ------------------------------------------------------------------ #
-    project = None
-    try:
-        project = get_project()
-    except Exception:
-        # Not in a project context – fall back to CWD
-        pass
-
-    output_dir = project.get_directory() if project else os.getcwd()
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "clusters.png")
-
-    image.save(output_path)
-    print(f"Cluster map generated → {output_path}")
-
-    # ------------------------------------------------------------------ #
-    # 4. Generate individual maps for each cluster
-    # ------------------------------------------------------------------ #
-    for c_idx, (cluster_key, members) in enumerate(clusters.items()):
-        cluster_ctx = staticmaps.Context()
-        cluster_ctx.set_tile_provider(staticmaps.tile_provider_OSM)
-
-        # Use bundle keys to pick colours within this cluster map
-        bundle_keys = sorted({s.bundle_key or "unbundled" for s in members})
-        bundle_color_map = {
-            bk: _index_to_color(i) for i, bk in enumerate(bundle_keys)
-        }
-
-        for s in members:
-            coord = staticmaps.create_latlng(s.latitude, s.longitude)
-            color = bundle_color_map[s.bundle_key or "unbundled"]
-            cluster_ctx.add_object(staticmaps.Marker(coord, color=color, size=12))
-
-        cluster_image = cluster_ctx.render_pillow(width, height)
-        filename = f"cluster_{_safe_filename(cluster_key)}.png"
-        cluster_path = os.path.join(output_dir, filename)
-        cluster_image.save(cluster_path)
-        print(f"   ↳ {cluster_key}: {cluster_path}")
-
-    # ------------------------------------------------------------------ #
-    # 5. Generate individual maps for each bundle
-    # ------------------------------------------------------------------ #
+    # Build a mapping bundle_key → students
     bundles: Dict[str, List[Student]] = {}
     for s in students:
         b_key = s.bundle_key or "unbundled"
         bundles.setdefault(b_key, []).append(s)
 
-    # All bundle maps use the same marker color for clarity
-    bundle_marker_color = staticmaps.BLUE
+    # ------------------------------------------------------------------ #
+    # 2. Build the master map (all students, coloured by bundle)
+    # ------------------------------------------------------------------ #
+    master_ctx = staticmaps.Context()
+    master_ctx.set_tile_provider(staticmaps.tile_provider_OSM)
 
-    for b_idx, (bundle_key, members) in enumerate(bundles.items()):
+    bundle_keys_sorted = sorted(bundles.keys())
+    bundle_color_map = {
+        bk: _index_to_color(i) for i, bk in enumerate(bundle_keys_sorted)
+    }
+
+    for b_key, members in bundles.items():
+        color = bundle_color_map[b_key]
+        for s in members:
+            coord = staticmaps.create_latlng(s.latitude, s.longitude)
+            master_ctx.add_object(staticmaps.Marker(coord, color=color, size=12))
+
+    master_image = master_ctx.render_pillow(width, height)
+
+    # Determine output directory
+    try:
+        project = get_project()
+        output_dir = project.get_directory()
+    except Exception:
+        output_dir = os.getcwd()
+
+    os.makedirs(output_dir, exist_ok=True)
+    master_path = os.path.join(output_dir, "master.png")
+    master_image.save(master_path)
+    print(f"Master map generated → {master_path}")
+
+    # ------------------------------------------------------------------ #
+    # 3. Generate individual maps for each bundle
+    # ------------------------------------------------------------------ #
+    bundle_marker_color = staticmaps.BLUE  # Uniform colour within each bundle map
+
+    for b_key, members in bundles.items():
         bundle_ctx = staticmaps.Context()
         bundle_ctx.set_tile_provider(staticmaps.tile_provider_OSM)
 
@@ -156,7 +125,7 @@ def generate_maps(width: int = 1200, height: int = 800) -> None:
             bundle_ctx.add_object(staticmaps.Marker(coord, color=bundle_marker_color, size=12))
 
         bundle_image = bundle_ctx.render_pillow(width, height)
-        filename = f"bundle_{_safe_filename(bundle_key)}.png"
+        filename = f"bundle_{_safe_filename(b_key)}.png"
         bundle_path = os.path.join(output_dir, filename)
         bundle_image.save(bundle_path)
-        print(f"   ↳ bundle {bundle_key}: {bundle_path}")
+        print(f"   ↳ bundle {b_key}: {bundle_path}")

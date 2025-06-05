@@ -49,8 +49,8 @@ configure           Interactive re-configuration of the current project
 import <file>       Import student CSV (requires “First Name”, “Last Name”, “Address”)  
 geocode             Look up lat/long for any un-geocoded addresses  
 fix addresses       Manually correct addresses that failed geocoding  
-cluster             Run K-Means & slice clusters into bundles  
-generate maps       Produce PNG maps (per project, per cluster, per bundle)  
+cluster             Run K-Means & group addresses into bundles  
+generate maps       Produce PNG maps (master showing all addresses and per bundle)  
 generate pdfs       Produce PDFs (master list + one per bundle)  
 generate            Shortcut: generate maps **then** pdfs
 ```
@@ -64,7 +64,6 @@ Lines starting with `$` are commands; the rest is program output.
 $ ab work on washout-hs
 Configure project settings (press Enter to keep current value)
 School name: Washout High School
-Cluster count [5]: 4
 Bundle size [20]:
 Configuration saved to project.yaml
 Now working on project: washout-hs
@@ -102,9 +101,8 @@ PDF generation complete.
 
 After the final step you’ll find:
 
-* `clusters.png` – a bird’s-eye map with each cluster colour-coded
-* `cluster_<n>.png` – close-up maps, one per cluster
-* `bundle_<n>-<letter>.png` – zoomed maps for each bundle
+* `master.png` – a bird’s-eye map with each cluster colour-coded
 * `master.pdf` – the master roster
-* `bundle_<n>-<letter>.pdf` – an address sheet for each delivery bundle
+* `bundle_<letter>.png` – zoomed maps for each bundle
+* `bundle_<letter>.pdf` – an address sheet for each delivery bundle
 

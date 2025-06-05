@@ -5,7 +5,7 @@ PDF generation utilities for Address Bundler.
 
 Creates:
 
-* master.pdf              – overview map (clusters.png) plus index of all
+* master.pdf              – overview map (master.png) plus index of all
   students → bundle key.
 * bundle_<bundle>.pdf     – per-bundle map plus roster with addresses.
 """
@@ -184,8 +184,8 @@ def generate_pdfs() -> None:
     master_path = os.path.join(output_dir, "master.pdf")
     c = canvas.Canvas(master_path, pagesize=LETTER)
 
-    clusters_png = os.path.join(output_dir, "clusters.png")
-    img_height = _draw_image(c, clusters_png, margin, max_height=page_height * 0.5)
+    master_png = os.path.join(output_dir, "master.png")
+    img_height = _draw_image(c, master_png, margin, max_height=page_height * 0.5)
 
     title_y = page_height - margin - (img_height + line_height if img_height else 0)
     c.setFont("Helvetica-Bold", 16)
