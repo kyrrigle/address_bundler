@@ -1,4 +1,31 @@
 
+# Address Bundler
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+
+A CLI tool for organizing, geocoding, and bundling addresses for efficient delivery or distribution. Generates maps and PDFs for each bundle, making logistics simple for schools, campaigns, and organizations.
+
+---
+
+## Features
+
+- Project-based workflow for managing multiple address lists
+- Import CSVs with student or address data
+- Geocode addresses and manually fix errors
+- Cluster addresses into delivery bundles using K-Means
+- Generate color-coded maps and printable PDFs for each bundle
+- Simple, scriptable CLI interface
+
+---
+
+## Requirements
+
+- Python 3.8 or higher
+- pip
+
+---
+
 ## Installation
 
 ```bash
@@ -10,6 +37,37 @@ pip install -e .
 ```
 
 > Tip The executable is called ab (short for address bundler) and is placed on your $PATH by the install step above.
+
+---
+
+## Getting Started
+
+1. **Create or switch to a project:**
+   ```bash
+   ab work on my-project
+   ```
+2. **Import your address CSV:**
+   ```bash
+   ab import test-data/fake-student-addresses.csv
+   ```
+3. **Geocode addresses:**
+   ```bash
+   ab geocode
+   ```
+4. **Fix any addresses that failed geocoding:**
+   ```bash
+   ab fix addresses
+   ```
+5. **Cluster addresses into bundles:**
+   ```bash
+   ab cluster
+   ```
+6. **Generate maps and PDFs:**
+   ```bash
+   ab generate
+   ```
+
+---
 
 ## Project structure
 

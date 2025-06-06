@@ -33,7 +33,12 @@ dependencies = [
   "PyYAML",
   "tqdm",
   "py-staticmaps[cairo]",
-  "Pillow<10.0"
+  "Pillow<10.0",
+  "usaddress"
+]
+[project.optional-dependencies]
+test = [
+  "pytest"
 ]
 
 [tool.setuptools.packages.find]
@@ -43,3 +48,7 @@ exclude = ["tests*"]
 [project.scripts]
 ab = "address_bundler.main:main"
 address-bundler = "address_bundler.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".venv"]
