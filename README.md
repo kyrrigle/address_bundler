@@ -21,7 +21,7 @@ A CLI tool for organizing, geocoding, and bundling addresses for efficient deliv
 
 ## Requirements
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - pip
 
 ---
@@ -31,12 +31,21 @@ A CLI tool for organizing, geocoding, and bundling addresses for efficient deliv
 ```bash
 git clone https://github.com/your-org/address_bundler.git
 cd address_bundler
-python -m venv .venv && source .venv/bin/activate
-pip install -e .
-# Now "ab" is on your PATH (via the editable install)
+poetry install
+eval $(poetry env activate)
+# Now "ab" is on your PATH (via the Poetry environment)
 ```
 
 > Tip The executable is called ab (short for address bundler) and is placed on your $PATH by the install step above.
+
+**Using Poetry**
+
+- If you don't have Poetry, install it with:
+  ```bash
+  curl -sSL https://install.python-poetry.org | python3 -
+  ```
+- To add dependencies, use `poetry add <package>`.
+- To run scripts or commands in the Poetry environment, use `poetry run <command>`.
 
 ---
 
