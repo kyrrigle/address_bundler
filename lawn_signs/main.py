@@ -5,7 +5,7 @@ Usage:
     ab-signs import <csv-file> <photos-directory> [--name-column NAME] [--filename-column NAME]  [--fuzzy-threshold SCORE]
     ab-signs summary
     ab-signs validate [--min-resolution PIXELS]
-    ab-signs auto-crop [--aspect-ratio RATIO]
+    ab-signs auto-crop [--aspect-ratio RATIO] [--force]
 
 Options:
     --help -h                Show this help message
@@ -14,6 +14,7 @@ Options:
     --fuzzy-threshold SCORE  How close of a match to determine fuzzy name matching [default: 80]
     --min-resolution PIXELS  Minimum total pixels required for valid images [default: 1000000]
     --aspect-ratio RATIO     Aspect ratio for cropping photos [default: 0.8]
+    --force                  Force the command to run again (re-do work)
 
 Description:
 
@@ -73,9 +74,10 @@ def main():
     # Handle auto-crop command and parse --aspect-ratio parameter
     if options.get("auto-crop"):
         aspect_ratio = float(options["--aspect-ratio"])
+        force = options["--force"]
         from .auto_crop import auto_crop_command
 
-        auto_crop_command(aspect_ratio)
+        auto_crop_command(aspect_ratio, force)
         return
 
     print("Command not handled")

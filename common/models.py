@@ -32,12 +32,13 @@ class Student(BaseModel):
     )
 
     @classmethod
-    def get_students_needing_cropping(cls):
+    def get_students_needing_cropping(cls, force=False):
         """
         Returns a query for students who are validated but not yet cropped.
         """
         return cls.select().where(
-            (cls.cropping_status == "not_cropped") & (cls.image_valid == "valid")
+            (force or cls.cropping_status == "not_cropped")
+            & (cls.image_valid == "valid")
         )
 
     class Meta:

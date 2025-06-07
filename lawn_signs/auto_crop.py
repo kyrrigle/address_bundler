@@ -3,8 +3,6 @@
 Current status
 --------------
 
-The module presently only exposes :func:`crop_placeholder` as a stub so the
-test suite passes.  In later tasks it will grow full face-detection and
 cropping logic.
 
 The required third-party libraries (Pillow and face_recognition) and standard
@@ -27,16 +25,27 @@ import face_recognition  # type: ignore
 
 # Project imports
 from common.models import Student
+from common.project import get_project
 from peewee import DoesNotExist
 
 
 # --------------------------------------------------------------------------- #
-# Temporary stub
+# Cropped Directory Management (Task 5.1)
 # --------------------------------------------------------------------------- #
-def crop_placeholder() -> None:
-    """Temporary stub to satisfy linters until real implementation arrives."""
-    # This function will be replaced in task 2.x.
-    return None
+def ensure_cropped_dir_exists(base_dir: str | Path) -> Path:
+    """
+    Ensure the cropped directory structure exists under the given base directory.
+
+    Args:
+        base_dir (str | Path): The base directory where the 'cropped' subdirectory should be created.
+
+    Returns:
+        Path: The full path to the cropped directory.
+    """
+    base = Path(base_dir)
+    cropped_dir = base / "cropped"
+    cropped_dir.mkdir(parents=True, exist_ok=True)
+    return cropped_dir
 
 
 # --------------------------------------------------------------------------- #
@@ -72,8 +81,8 @@ def calculate_crop_box_for_largest_face(
     crop boundaries fit within the image.
 
     This function robustly handles multiple faces by always choosing the one with
-    the largest area (width * height).
-
+    the largest area (width * height). Uses a maximized crop approach that
+    maintains aspect ratio while centering on the face.
 
     Args:
         image_size (tuple): (width, height) of the image.
@@ -110,36 +119,37 @@ def calculate_crop_box_for_largest_face(
     face_center_y = (top + bottom) // 2
 
     img_w, img_h = image_size
+    image_aspect = img_w / img_h
 
-    # Calculate crop size: maximize area around face, maintain aspect ratio, fit in image
-    face_w = right - left
-    face_h = bottom - top
+    # Calculate crop dimensions based on aspect ratio comparison
+    if image_aspect > aspect_ratio:
+        # Image is too wide - crop width, use full height
+        new_width = int(img_h * aspect_ratio)
+        new_height = img_h
+        left_crop = max(0, face_center_x - new_width // 2)
+        right_crop = min(left_crop + new_width, img_w)
+        # Adjust left if right would exceed image bounds
+        if right_crop == img_w:
+            left_crop = img_w - new_width
+        top_crop = 0
+        bottom_crop = img_h
+    else:
+        # Image is too tall - crop height, use full width
+        new_height = int(img_w / aspect_ratio)
+        new_width = img_w
+        top_crop = max(0, face_center_y - new_height // 2)
+        bottom_crop = min(top_crop + new_height, img_h)
+        # Adjust top if bottom would exceed image bounds
+        if bottom_crop == img_h:
+            top_crop = img_h - new_height
+        left_crop = 0
+        right_crop = img_w
 
-    # Target crop height: expand to include some margin (e.g., 1.5x face height)
-    margin = 0.75
-    crop_h = int(face_h * (1 + margin))
-    crop_w = int(round(crop_h * aspect_ratio))
-
-    # Adjust crop size to fit within image boundaries
-    if crop_w > img_w:
-        crop_w = img_w
-        crop_h = int(round(crop_w / aspect_ratio))
-
-    if crop_h > img_h:
-        crop_h = img_h
-        crop_w = int(round(crop_h * aspect_ratio))
-
-    # Center crop on face, clamp to image boundaries
-    left_crop = max(0, min(img_w - crop_w, face_center_x - crop_w // 2))
-    upper_crop = max(0, min(img_h - crop_h, face_center_y - crop_h // 2))
-    right_crop = min(img_w, left_crop + crop_w)
-    lower_crop = min(img_h, upper_crop + crop_h)
-
-    # Final validation: ensure crop box is within image
-    if left_crop < 0 or upper_crop < 0 or right_crop > img_w or lower_crop > img_h:
+    # Final validation: ensure crop box is within image bounds
+    if left_crop < 0 or top_crop < 0 or right_crop > img_w or bottom_crop > img_h:
         raise ValueError("Calculated crop box is out of image bounds.")
 
-    return (left_crop, upper_crop, right_crop, lower_crop)
+    return (left_crop, top_crop, right_crop, bottom_crop)
 
 
 # --------------------------------------------------------------------------- #
@@ -251,53 +261,272 @@ def crop_image_with_pil(
 # --------------------------------------------------------------------------- #
 # CLI Orchestration Entry Point
 # --------------------------------------------------------------------------- #
-def auto_crop_command(aspect_ratio: float) -> None:
+def auto_crop_command(aspect_ratio: float, force: bool) -> None:
     """
     Entry point for the auto-crop CLI command.
     Orchestrates the cropping process and provides progress reporting and user feedback.
+    Implements batch processing of all eligible students with comprehensive error handling,
+    logging, result reporting, graceful continuation, memory management, and validation.
     """
-    # Simulated list of images for demonstration; replace with real batch logic in later tasks
-    image_list = [
-        "student1.jpg",
-        "student2.jpg",
-        "student3.jpg",
-        "student4.jpg",
-        "student5.jpg",
-    ]
-    total = len(image_list)
-    print(
-        f"Starting auto-crop batch process for {total} images (aspect_ratio={aspect_ratio})"
+    import logging
+    import gc
+    from typing import Dict, List, Tuple
+
+    project = get_project()
+
+    # Set up logging for debugging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.FileHandler("auto_crop_debug.log"), logging.StreamHandler()],
     )
+    logger = logging.getLogger(__name__)
+
+    # Query all students needing cropping (only validated photos)
+    students = list(Student.get_students_needing_cropping(force=force))
+    # Additional validation: only process students with valid images
+    validated_students = [
+        student
+        for student in students
+        if student.image_valid == "valid" and student.image_name
+    ]
+
+    total = len(validated_students)
+    skipped_unvalidated = len(students) - total
+
+    if skipped_unvalidated > 0:
+        print(
+            f"Skipped {skipped_unvalidated} students with unvalidated or missing images"
+        )
+        logger.info(
+            f"Skipped {skipped_unvalidated} students: images not validated or missing"
+        )
+
+    if total == 0:
+        print("No validated images found that need cropping.")
+        logger.info("No validated images found that need cropping")
+        return
+
+    print(
+        f"Starting auto-crop batch process for {total} validated students (aspect_ratio={aspect_ratio})"
+    )
+    logger.info(
+        f"Starting batch process: {total} students, aspect_ratio={aspect_ratio}"
+    )
+
+    # Initialize counters and tracking
     success_count = 0
     fail_count = 0
-    for idx, img_name in enumerate(image_list, 1):
-        print(f"[{idx}/{total}] Processing: {img_name} ...", end="")
+    face_detected_count = 0
+    center_crop_count = 0
+    failed_students: List[Tuple[str, str, str]] = []  # (name, image_name, error)
+
+    # Determine base directory for cropped images
+    base_dir = Path(project.get_directory())
+    cropped_dir = ensure_cropped_dir_exists(base_dir)
+
+    # Define possible photo directories for input path resolution
+    photo_search_dirs = [
+        base_dir / "originals",  # Primary location for validated photos
+        base_dir / "photos",
+        base_dir / "test-data" / "washout-hs" / "photos",
+    ]
+
+    # Process each student with comprehensive error handling
+    for idx, student in enumerate(validated_students, 1):
+        img_name = student.image_name
+        student_name = f"{student.first_name} {student.last_name}"
+
+        print(
+            f"[{idx}/{total}] Processing: {student_name} ({img_name}) ...",
+            end="",
+            flush=True,
+        )
+        logger.info(
+            f"Processing student {idx}/{total}: {student_name}, image: {img_name}"
+        )
+
         try:
-            # Simulate processing (replace with real crop logic later)
-            # For now, randomly fail one image for demo
-            if img_name == "student3.jpg":
-                raise Exception("Simulated error: face not found")
-            # --- Database update logic for cropping_status ---
+            # Validate student data
+            if not img_name or not img_name.strip():
+                raise ValueError("Student has no image filename")
+
+            # Find input image path
+            input_path = None
+            for photos_dir in photo_search_dirs:
+                candidate = photos_dir / img_name
+                if candidate.exists():
+                    input_path = candidate
+                    logger.debug(f"Found image at: {input_path}")
+                    break
+
+            if not input_path:
+                searched_paths = [str(d / img_name) for d in photo_search_dirs]
+                raise FileNotFoundError(f"Photo not found. Searched: {searched_paths}")
+
+            # Validate file accessibility and basic image properties
+            if not os.access(input_path, os.R_OK):
+                raise PermissionError(f"Cannot read image file: {input_path}")
+
+            # Open and validate image
             try:
-                student = Student.get(Student.image_name == img_name)
+                with Image.open(input_path) as img:
+                    image_size = img.size
+                    logger.debug(f"Image size: {image_size}")
+
+                    # Validate image dimensions
+                    if image_size[0] < 10 or image_size[1] < 10:
+                        raise ValueError(f"Image too small: {image_size}")
+            except Exception as img_error:
+                raise ValueError(f"Invalid or corrupted image file: {img_error}")
+
+            # Detect faces with detailed logging
+            try:
+                face_locations = detect_faces(input_path)
+                face_count = len(face_locations)
+                logger.debug(f"Detected {face_count} faces")
+
+                if face_count > 0:
+                    face_detected_count += 1
+                    logger.debug(f"Face locations: {face_locations}")
+            except Exception as face_error:
+                logger.warning(f"Face detection failed: {face_error}")
+                face_locations = []
+
+            # Calculate crop box with fallback logic
+            crop_box = None
+            crop_method = ""
+
+            if face_locations:
+                try:
+                    crop_box = calculate_crop_box_for_largest_face(
+                        image_size, face_locations, aspect_ratio
+                    )
+                    if crop_box:
+                        crop_method = "face-based"
+                        logger.debug(f"Face-based crop box: {crop_box}")
+                    else:
+                        logger.warning("Face-based crop calculation returned None")
+                except Exception as crop_error:
+                    logger.warning(f"Face-based crop calculation failed: {crop_error}")
+
+            # Fallback to center crop if face-based cropping failed
+            if crop_box is None:
+                try:
+                    crop_box = calculate_center_crop_box(image_size, aspect_ratio)
+                    crop_method = "center"
+                    center_crop_count += 1
+                    logger.debug(f"Center crop box: {crop_box}")
+                except Exception as center_error:
+                    raise ValueError(
+                        f"Both face-based and center crop failed: {center_error}"
+                    )
+
+            # Output path in cropped directory
+            output_path = cropped_dir / img_name
+
+            # Ensure output directory is writable
+            if not os.access(cropped_dir, os.W_OK):
+                raise PermissionError(
+                    f"Cannot write to cropped directory: {cropped_dir}"
+                )
+
+            # Crop and save image with quality preservation
+            try:
+                crop_image_with_pil(
+                    input_path=input_path,
+                    crop_box=crop_box,
+                    output_path=output_path,
+                    image_format=None,
+                    quality=95,
+                )
+                logger.debug(f"Cropped image saved to: {output_path}")
+            except Exception as save_error:
+                raise ValueError(f"Failed to crop and save image: {save_error}")
+
+            # Update cropping_status in database
+            try:
                 student.cropping_status = "cropped"
                 student.save()
-            except DoesNotExist:
-                print(" warning: student not found for image_name.", end="")
-            print(" done.")
+                logger.debug(f"Updated database: cropping_status = 'cropped'")
+            except Exception as db_error:
+                logger.error(f"Database update failed: {db_error}")
+                # Still consider this a success since the image was processed
+                print(f" done ({crop_method} crop, db warning)")
+            else:
+                print(f" done ({crop_method} crop)")
+
             success_count += 1
+            logger.info(
+                f"Successfully processed {student_name} using {crop_method} crop"
+            )
+
         except Exception as e:
-            # On failure, update cropping_status to "failed"
+            # Comprehensive error handling with graceful continuation
+            error_msg = str(e)
+            failed_students.append((student_name, img_name, error_msg))
+
+            # Log detailed error information
+            logger.error(f"Failed to process {student_name} ({img_name}): {error_msg}")
+
+            # Update cropping_status to "failed" in database
             try:
-                student = Student.get(Student.image_name == img_name)
                 student.cropping_status = "failed"
                 student.save()
-            except DoesNotExist:
-                print(" warning: student not found for image_name.", end="")
-            print(f" failed! Reason: {e}")
+                logger.debug(f"Updated database: cropping_status = 'failed'")
+            except Exception as db_error:
+                logger.error(
+                    f"Could not update cropping_status to 'failed': {db_error}"
+                )
+                print(" failed! (db update error)", end="")
+
+            print(f" failed! ({error_msg})")
             fail_count += 1
-    print(f"\nBatch complete. {success_count} succeeded, {fail_count} failed.")
-    if fail_count > 0:
-        print("Some images could not be processed. See above for details.")
+
+        # Memory management: periodic garbage collection for large batches
+        if idx % 50 == 0:
+            gc.collect()
+            logger.debug(f"Performed garbage collection at student {idx}")
+
+    # Final garbage collection
+    gc.collect()
+
+    # Comprehensive result reporting
+    print(f"\n{'='*60}")
+    print("AUTO-CROP BATCH PROCESSING RESULTS")
+    print(f"{'='*60}")
+    print(f"Total students processed: {total}")
+    print(f"Successful crops: {success_count}")
+    print(f"Failed crops: {fail_count}")
+    print(f"Success rate: {(success_count/total*100):.1f}%" if total > 0 else "N/A")
+
+    if success_count > 0:
+        print(f"\nCrop method breakdown:")
+        print(f"  Face-detected crops: {face_detected_count}")
+        print(f"  Center crops (fallback): {center_crop_count}")
+        print(f"  Face detection rate: {(face_detected_count/success_count*100):.1f}%")
+
+    if skipped_unvalidated > 0:
+        print(f"\nSkipped unvalidated images: {skipped_unvalidated}")
+
+    # Detailed failure reporting
+    if failed_students:
+        print(f"\nFailed students ({len(failed_students)}):")
+        for name, img_name, error in failed_students:
+            print(f"  - {name} ({img_name}): {error}")
+
+        print(f"\nFor detailed debugging information, check: auto_crop_debug.log")
+
+    # Final status message
+    if fail_count == 0:
+        print("\n✓ All images processed successfully!")
+        logger.info("Batch processing completed successfully")
+    elif success_count > 0:
+        print(f"\n⚠ Batch completed with {fail_count} failures. Check log for details.")
+        logger.warning(f"Batch completed with {fail_count} failures")
     else:
-        print("All images processed successfully.")
+        print("\n✗ Batch processing failed completely. Check log for details.")
+        logger.error("Batch processing failed completely")
+
+    print(f"Cropped images saved to: {cropped_dir}")
+    logger.info(f"Batch processing completed. Cropped images in: {cropped_dir}")

@@ -5,15 +5,6 @@ import importlib
 import inspect
 
 
-def test_crop_placeholder_exists_and_returns_none() -> None:
-    """Import the module and verify the stub works as expected."""
-    module = importlib.import_module("lawn_signs.auto_crop")
-    assert hasattr(module, "crop_placeholder"), "crop_placeholder() is missing"
-    assert inspect.isfunction(module.crop_placeholder)
-    # The placeholder currently does nothing and returns None.
-    assert module.crop_placeholder() is None
-
-
 def test_calculate_center_crop_box_basic():
     from lawn_signs import auto_crop
 
