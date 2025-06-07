@@ -15,6 +15,7 @@ class Student(BaseModel):
     longitude = FloatField(null=True)
     bundle_key = CharField(null=True)
     image_name = CharField(null=True)
+    image_valid = CharField(null=True, choices=[('unknown', 'Unknown'), ('valid', 'Valid'), ('invalid', 'Invalid')], default='unknown')
 
     class Meta:
         table_name = "student"

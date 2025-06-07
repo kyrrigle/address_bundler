@@ -4,12 +4,14 @@
 Usage:
     ab-signs import <csv-file> <photos-directory> [--name-column NAME] [--filename-column NAME]  [--fuzzy-threshold SCORE]
     ab-signs summary
+    ab-signs validate [--min-resolution PIXELS]
 
 Options:
     --help -h                Show this help message
     --name-column NAME       Column to use for student name when importing [default: Name]
     --filename-column NAME   Column to use for filename when importing [default: Filename]
     --fuzzy-threshold SCORE  How close of a match to determine fuzzy name matching [default: 80]
+    --min-resolution PIXELS  Minimum total pixels required for valid images [default: 1000000]
 
 Description:
 
@@ -19,6 +21,10 @@ import
 
 summary
     Prints a summary of the lawn signs project.
+
+validate
+    Validate original photos to meet specific constraints (readable image file, minimum resolution).
+    Updates student records with validation status.
 """
 
 import sys
@@ -33,6 +39,12 @@ def main():
     if options['summary']:
         from .summary import run_summary_command
         run_summary_command()
+        return
+    
+    if options['validate']:
+        min_resolution = int(options['--min-resolution'])
+        from .validate import validate_student_images
+        validate_student_images(min_resolution)
         return
     
     if options['import'] and options['<csv-file>'] and options['<photos-directory>']:

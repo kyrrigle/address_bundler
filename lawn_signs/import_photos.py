@@ -5,6 +5,7 @@ from typing import Optional, Tuple, List, NamedTuple
 from fuzzywuzzy import fuzz
 from common.project import get_project
 from common.models import Student
+from .validate import reset_validation_status
 
 
 class MatchResult(NamedTuple):
@@ -276,6 +277,9 @@ def update_student_record(match_result: MatchResult, first_name: str, last_name:
         # Update existing student
         student = match_result.student
         
+        # Check if image is being changed
+        image_changed = student.image_name != image_name
+        
         # For fuzzy matches, update the name to the import file version
         if match_result.match_type == 'fuzzy':
             student.first_name = first_name
@@ -285,6 +289,11 @@ def update_student_record(match_result: MatchResult, first_name: str, last_name:
             print(f"Updated photo for existing student: {first_name} {last_name}")
         
         student.image_name = image_name
+        
+        # Reset validation status if image changed
+        if image_changed and image_name is not None:
+            student.image_valid = 'unknown'
+        
         student.save()
     else:
         # Create new student record (address is required, so use placeholder)
@@ -292,6 +301,7 @@ def update_student_record(match_result: MatchResult, first_name: str, last_name:
             first_name=first_name,
             last_name=last_name,
             address="",  # Placeholder - will be filled in later
-            image_name=image_name
+            image_name=image_name,
+            image_valid='unknown' if image_name is not None else None
         )
         print(f"Created new student record: {first_name} {last_name}")
