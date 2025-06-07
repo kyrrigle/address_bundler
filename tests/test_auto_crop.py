@@ -12,8 +12,11 @@ def test_crop_placeholder_exists_and_returns_none() -> None:
     assert inspect.isfunction(module.crop_placeholder)
     # The placeholder currently does nothing and returns None.
     assert module.crop_placeholder() is None
+
+
 def test_calculate_center_crop_box_basic():
     from lawn_signs import auto_crop
+
     # Image size: 1000x800, aspect ratio 0.8 (so crop_w=640, crop_h=800)
     box = auto_crop.calculate_center_crop_box((1000, 800), aspect_ratio=0.8)
     left, upper, right, lower = box
@@ -22,8 +25,10 @@ def test_calculate_center_crop_box_basic():
     assert left == (1000 - 640) // 2
     assert upper == 0  # crop_h == img_h, so upper should be 0
 
+
 def test_calculate_center_crop_box_tall_image():
     from lawn_signs import auto_crop
+
     # Image size: 600x1200, aspect ratio 0.5 (so crop_h=1200, crop_w=600)
     box = auto_crop.calculate_center_crop_box((600, 1200), aspect_ratio=0.5)
     left, upper, right, lower = box
@@ -32,8 +37,10 @@ def test_calculate_center_crop_box_tall_image():
     assert left == 0
     assert upper == 0
 
+
 def test_calculate_center_crop_box_wide_image():
     from lawn_signs import auto_crop
+
     # Image size: 1200x600, aspect ratio 2.0 (so crop_w=1200, crop_h=600)
     box = auto_crop.calculate_center_crop_box((1200, 600), aspect_ratio=2.0)
     left, upper, right, lower = box
@@ -42,8 +49,10 @@ def test_calculate_center_crop_box_wide_image():
     assert left == 0
     assert upper == 0
 
+
 def test_calculate_center_crop_box_smaller_than_image():
     from lawn_signs import auto_crop
+
     # Image size: 1000x800, aspect ratio 1.0 (so crop_h=800, crop_w=800)
     box = auto_crop.calculate_center_crop_box((1000, 800), aspect_ratio=1.0)
     left, upper, right, lower = box
@@ -52,9 +61,11 @@ def test_calculate_center_crop_box_smaller_than_image():
     assert left == 100
     assert upper == 0
 
+
 def _create_test_image(path, fmt="JPEG", size=(100, 100), color=(128, 128, 128)):
     img = Image.new("RGB", size, color)
     img.save(path, format=fmt, quality=95)
+
 
 def test_crop_image_with_pil_quality_preservation():
     from lawn_signs.auto_crop import crop_image_with_pil
@@ -75,7 +86,9 @@ def test_crop_image_with_pil_quality_preservation():
             orig_bytes = f1.read()
             out_bytes = f2.read()
             # Allow for minor metadata differences, but files should be nearly identical in size
-            assert abs(len(orig_bytes) - len(out_bytes)) < 100, "Full-image crop should not recompress"
+            assert (
+                abs(len(orig_bytes) - len(out_bytes)) < 100
+            ), "Full-image crop should not recompress"
 
         # 2. Crop a subregion (should save as JPEG, high quality)
         out_path_crop = os.path.join(tmpdir, "out_crop.jpg")
@@ -95,11 +108,17 @@ def test_crop_image_with_pil_quality_preservation():
         out_png = os.path.join(tmpdir, "out_full.png")
         crop_image_with_pil(orig_png, (0, 0, 100, 100), out_png)
         with open(orig_png, "rb") as f1, open(out_png, "rb") as f2:
-            assert f1.read() == f2.read(), "PNG full-image crop should be byte-for-byte identical"
+            assert (
+                f1.read() == f2.read()
+            ), "PNG full-image crop should be byte-for-byte identical"
+
+
 import pytest
+
 
 def test_calculate_crop_box_for_largest_face_basic():
     from lawn_signs.auto_crop import calculate_crop_box_for_largest_face
+
     # Simulate two faces: one small, one large
     image_size = (1000, 800)
     faces = [
@@ -113,15 +132,19 @@ def test_calculate_crop_box_for_largest_face_basic():
     assert 0 <= left < right <= image_size[0]
     assert 0 <= upper < lower <= image_size[1]
 
+
 def test_calculate_crop_box_for_largest_face_no_faces():
     from lawn_signs.auto_crop import calculate_crop_box_for_largest_face
+
     image_size = (1000, 800)
     faces = []
     box = calculate_crop_box_for_largest_face(image_size, faces, aspect_ratio=0.8)
     assert box is None
 
+
 def test_calculate_crop_box_for_largest_face_invalid_aspect_ratio():
     from lawn_signs.auto_crop import calculate_crop_box_for_largest_face
+
     image_size = (1000, 800)
     faces = [(100, 200, 300, 100)]
     with pytest.raises(ValueError):
@@ -131,8 +154,10 @@ def test_calculate_crop_box_for_largest_face_invalid_aspect_ratio():
     with pytest.raises(ValueError):
         calculate_crop_box_for_largest_face(image_size, faces, aspect_ratio=100)
 
+
 def test_calculate_crop_box_for_largest_face_edge_case():
     from lawn_signs.auto_crop import calculate_crop_box_for_largest_face
+
     # Face at the edge of the image
     image_size = (500, 500)
     faces = [(0, 500, 100, 400)]  # right at the right edge
@@ -141,8 +166,10 @@ def test_calculate_crop_box_for_largest_face_edge_case():
     assert 0 <= left < right <= image_size[0]
     assert 0 <= upper < lower <= image_size[1]
 
+
 def test_fallback_to_center_crop_when_no_faces(monkeypatch):
     from lawn_signs import auto_crop
+
     # Patch detect_faces to always return []
     monkeypatch.setattr(auto_crop, "detect_faces", lambda path: [])
     # Use a dummy image size
@@ -156,16 +183,20 @@ def test_fallback_to_center_crop_when_no_faces(monkeypatch):
         assert 0 <= left < right <= image_size[0]
         assert 0 <= upper < lower <= image_size[1]
 
+
 def test_detect_faces_mock(monkeypatch):
     from lawn_signs import auto_crop
+
     # Patch face_recognition.face_locations to return a known value
     class DummyFR:
         @staticmethod
         def load_image_file(path):
             return "dummy_image"
+
         @staticmethod
         def face_locations(image):
             return [(10, 60, 50, 20)]
+
     monkeypatch.setattr(auto_crop, "face_recognition", DummyFR)
     faces = auto_crop.detect_faces("dummy.jpg")
     assert faces == [(10, 60, 50, 20)]

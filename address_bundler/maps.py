@@ -122,7 +122,9 @@ def generate_maps(width: int = 1200, height: int = 800) -> None:
 
         for s in members:
             coord = staticmaps.create_latlng(s.latitude, s.longitude)
-            bundle_ctx.add_object(staticmaps.Marker(coord, color=bundle_marker_color, size=12))
+            bundle_ctx.add_object(
+                staticmaps.Marker(coord, color=bundle_marker_color, size=12)
+            )
 
         bundle_image = bundle_ctx.render_pillow(width, height)
         filename = f"bundle_{_safe_filename(b_key)}.png"

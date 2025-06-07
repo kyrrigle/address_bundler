@@ -101,6 +101,7 @@ def detect_pdfs_generated(project) -> bool:
             return True
     return False
 
+
 def run_summary_command():
     """
     Runs the summary command logic, printing a summary of the current project.
@@ -113,7 +114,9 @@ def run_summary_command():
     students = list(Student.select())
     num_students = len(students)
     town_histogram = compute_town_histogram(students) if num_students > 0 else None
-    num_geocoded = sum(1 for s in students if is_geocoded(s)) if num_students > 0 else None
+    num_geocoded = (
+        sum(1 for s in students if is_geocoded(s)) if num_students > 0 else None
+    )
     clustering_run = detect_clustering_run(students) if num_students > 0 else None
     maps_generated = detect_maps_generated(project)
     pdfs_generated = detect_pdfs_generated(project)

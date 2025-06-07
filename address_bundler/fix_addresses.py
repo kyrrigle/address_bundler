@@ -5,10 +5,15 @@ from common.models import Student
 
 def fix_addresses():
     # Ensure at least one student already has coordinates
-    if Student.select().where(
-        (Student.latitude.is_null(False)) & (Student.longitude.is_null(False))
-    ).count() == 0:
-        print("No students have been geocoded yet.  Perhaps you want to run geocode first?")
+    if (
+        Student.select()
+        .where((Student.latitude.is_null(False)) & (Student.longitude.is_null(False)))
+        .count()
+        == 0
+    ):
+        print(
+            "No students have been geocoded yet.  Perhaps you want to run geocode first?"
+        )
         return
 
     # Process students missing coordinates

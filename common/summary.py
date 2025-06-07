@@ -57,7 +57,9 @@ def run_summary_command() -> None:
 
     # 2-3. Package-specific summaries (lazy imports avoid circular deps)
     from lawn_signs.summary import run_summary_command as run_lawn_signs_summary
-    from address_bundler.summary import run_summary_command as run_address_bundler_summary
+    from address_bundler.summary import (
+        run_summary_command as run_address_bundler_summary,
+    )
 
     # Lawn-signs summary
     run_lawn_signs_summary()

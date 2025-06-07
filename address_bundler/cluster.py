@@ -11,6 +11,7 @@ from sklearn.cluster import KMeans
 from common.models import Student
 from common.project import get_project
 
+
 # ---------------------------------------------------------------------- #
 # Helper functions
 # ---------------------------------------------------------------------- #
@@ -102,7 +103,9 @@ def cluster() -> None:
     for label in sorted(subclusters.keys()):
         chunk = subclusters[label]
         # Sort deterministically before sequential splitting
-        chunk.sort(key=lambda s: (_street_name(s.address), s.last_name, s.first_name, s.id))
+        chunk.sort(
+            key=lambda s: (_street_name(s.address), s.last_name, s.first_name, s.id)
+        )
 
         for i in range(0, len(chunk), bundle_size):
             part = chunk[i : i + bundle_size]
@@ -125,7 +128,8 @@ def cluster() -> None:
 
         # Candidate bundles with spare capacity
         candidates = [
-            k for k, lst in bundles.items()
+            k
+            for k, lst in bundles.items()
             if k != tiny_key and len(lst) + sz <= bundle_size
         ]
         if not candidates:

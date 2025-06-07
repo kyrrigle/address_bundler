@@ -25,6 +25,7 @@ from pathlib import Path
 from PIL import Image  # type: ignore
 import face_recognition  # type: ignore
 
+
 # --------------------------------------------------------------------------- #
 # Temporary stub
 # --------------------------------------------------------------------------- #
@@ -32,6 +33,8 @@ def crop_placeholder() -> None:
     """Temporary stub to satisfy linters until real implementation arrives."""
     # This function will be replaced in task 2.x.
     return None
+
+
 # --------------------------------------------------------------------------- #
 # Face Detection Logic
 # --------------------------------------------------------------------------- #
@@ -49,13 +52,15 @@ def detect_faces(image_path: str | Path) -> list[tuple[int, int, int, int]]:
     image = face_recognition.load_image_file(str(image_path))
     face_locations = face_recognition.face_locations(image)
     return face_locations
+
+
 # --------------------------------------------------------------------------- #
 # Crop Calculation Logic
 # --------------------------------------------------------------------------- #
 def calculate_crop_box_for_largest_face(
     image_size: tuple[int, int],
     face_locations: list[tuple[int, int, int, int]],
-    aspect_ratio: float = 0.8
+    aspect_ratio: float = 0.8,
 ) -> tuple[int, int, int, int] | None:
     """
     Given multiple detected faces, select the largest (most prominent) face and
@@ -80,8 +85,14 @@ def calculate_crop_box_for_largest_face(
     if not face_locations:
         return None
 
-    if not (isinstance(aspect_ratio, (float, int)) and aspect_ratio > 0 and aspect_ratio < 10):
-        raise ValueError(f"Invalid aspect_ratio: {aspect_ratio}. Must be > 0 and reasonable.")
+    if not (
+        isinstance(aspect_ratio, (float, int))
+        and aspect_ratio > 0
+        and aspect_ratio < 10
+    ):
+        raise ValueError(
+            f"Invalid aspect_ratio: {aspect_ratio}. Must be > 0 and reasonable."
+        )
 
     # Find the largest face by area (most prominent face)
     def area(loc):
@@ -126,12 +137,12 @@ def calculate_crop_box_for_largest_face(
 
     return (left_crop, upper_crop, right_crop, lower_crop)
 
+
 # --------------------------------------------------------------------------- #
 # Fallback Center-Crop Logic
 # --------------------------------------------------------------------------- #
 def calculate_center_crop_box(
-    image_size: tuple[int, int],
-    aspect_ratio: float = 0.8
+    image_size: tuple[int, int], aspect_ratio: float = 0.8
 ) -> tuple[int, int, int, int]:
     """
     Calculate a center crop rectangle for the given image size and aspect ratio, with validation.
@@ -148,8 +159,14 @@ def calculate_center_crop_box(
     """
     img_w, img_h = image_size
 
-    if not (isinstance(aspect_ratio, (float, int)) and aspect_ratio > 0 and aspect_ratio < 10):
-        raise ValueError(f"Invalid aspect_ratio: {aspect_ratio}. Must be > 0 and reasonable.")
+    if not (
+        isinstance(aspect_ratio, (float, int))
+        and aspect_ratio > 0
+        and aspect_ratio < 10
+    ):
+        raise ValueError(
+            f"Invalid aspect_ratio: {aspect_ratio}. Must be > 0 and reasonable."
+        )
 
     # Determine the largest crop that fits the aspect ratio
     crop_h = img_h
@@ -168,6 +185,8 @@ def calculate_center_crop_box(
         raise ValueError("Calculated center crop box is out of image bounds.")
 
     return (left, upper, right, lower)
+
+
 # --------------------------------------------------------------------------- #
 # Image Cropping Function (Task 2.5)
 # --------------------------------------------------------------------------- #
@@ -176,7 +195,7 @@ def crop_image_with_pil(
     crop_box: tuple[int, int, int, int],
     output_path: str | Path,
     image_format: str | None = None,
-    quality: int = 95
+    quality: int = 95,
 ) -> None:
     """
     Crop an image using PIL and save it with maximum quality, avoiding unnecessary recompression.

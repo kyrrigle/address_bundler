@@ -3,6 +3,7 @@ from address_bundler import summary_formatter
 
 SECTION_DIVIDER = "-" * 40
 
+
 def test_full_summary():
     summary = {
         "num_students": 5,
@@ -23,6 +24,7 @@ def test_full_summary():
     assert "Maps generated: Yes" in lines
     assert "PDFs generated: No" in lines
 
+
 def test_partial_summary_missing_fields():
     summary = {
         "num_students": None,
@@ -40,6 +42,7 @@ def test_partial_summary_missing_fields():
     assert f"Maps generated: {summary_formatter.MISSING}" in lines
     assert f"PDFs generated: {summary_formatter.MISSING}" in lines
 
+
 def test_empty_histogram():
     summary = {
         "num_students": 0,
@@ -52,6 +55,7 @@ def test_empty_histogram():
     lines = summary_formatter.get_project_summary_lines(summary)
     assert "Total students imported: 0" in lines
     assert "  (missing)" in lines or "  {}" in lines  # Accepts either missing or empty
+
 
 def test_histogram_truncation():
     # 12 towns, should truncate at 10
@@ -72,6 +76,7 @@ def test_histogram_truncation():
     assert trunc_lines
     assert "  ... (2 more towns)" in trunc_lines[0]
 
+
 def test_histogram_with_unknown_and_empty_town():
     histogram = {"Milton": 2, "": 1, None: 1}
     summary = {
@@ -86,12 +91,15 @@ def test_histogram_with_unknown_and_empty_town():
     # Should show "Unknown" for empty/None keys
     assert any("Unknown: 1" in line for line in lines)
 
+
 def test_independent_histogram_lines():
     # Directly test _get_town_histogram_lines
     histogram = {"A": 2, "B": 1}
     lines = summary_formatter._get_town_histogram_lines(histogram, max_rows=1)
     assert lines[0] == "  A: 2"
     assert lines[1].startswith("  ... (1 more towns)")
+
+
 def test_get_project_summary_lines_with_project_config():
     from address_bundler import summary_formatter
 

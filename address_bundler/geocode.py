@@ -64,7 +64,9 @@ def normalise_address(address: str) -> str:
 # ---------- Single-address geocode with retry ------------------------------
 
 
-def geocode_address(address: str, max_retries: int = 5) -> Tuple[Optional[float], Optional[float]]:
+def geocode_address(
+    address: str, max_retries: int = 5
+) -> Tuple[Optional[float], Optional[float]]:
     """
     Geocode a single address.
 
@@ -89,8 +91,13 @@ def geocode_address(address: str, max_retries: int = 5) -> Tuple[Optional[float]
             break
         except (GeocoderQuotaExceeded, GeocoderTimedOut, GeocoderServiceError) as e:
             wait = 2**attempt + random.uniform(0.0, 1.0)
-            logger.info("Geocode error '%s' (attempt %s/%s). Retrying in %.1fs",
-                        e, attempt + 1, max_retries, wait)
+            logger.info(
+                "Geocode error '%s' (attempt %s/%s). Retrying in %.1fs",
+                e,
+                attempt + 1,
+                max_retries,
+                wait,
+            )
             time.sleep(wait)
             continue
         except Exception as e:  # pragma: no cover
@@ -109,12 +116,8 @@ def geocode_missing_students() -> Tuple[int, int]:
 
     Returns (total_addresses_attempted, successfully_geocoded).
     """
-    to_fix = (
-        Student.select()
-        .where(
-            (Student.latitude.is_null(True))
-            | (Student.longitude.is_null(True))
-        )
+    to_fix = Student.select().where(
+        (Student.latitude.is_null(True)) | (Student.longitude.is_null(True))
     )
 
     total = to_fix.count()

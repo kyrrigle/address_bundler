@@ -31,6 +31,7 @@ def initialize_projects():
             db_path = os.path.join(_project.get_directory(), "students.db")
             init_db(db_path)
             from .models import Student
+
             Student.create_table(safe=True)
             return
     _project = None
@@ -54,6 +55,7 @@ def set_current_project(name):
     db_path = os.path.join(_project.get_directory(), "students.db")
     init_db(db_path)
     from .models import Student
+
     Student.create_table(safe=True)
 
     # If first-time creation, prompt for configuration
@@ -117,7 +119,9 @@ class Project:
         print("\nConfigure project settings (press Enter to keep current value)")
         # School name
         current_school = self.config.get("school_name", "")
-        school_prompt = f"School name [{current_school}]: " if current_school else "School name: "
+        school_prompt = (
+            f"School name [{current_school}]: " if current_school else "School name: "
+        )
         school_name = input(school_prompt).strip()
         if school_name:
             self.config["school_name"] = school_name
@@ -141,7 +145,9 @@ class Project:
         # Min bundle size
         current_min_bundle = self.config.get("min_bundle_size", 5)
         while True:
-            min_bundle_input = input(f"Min bundle size [{current_min_bundle}]: ").strip()
+            min_bundle_input = input(
+                f"Min bundle size [{current_min_bundle}]: "
+            ).strip()
             if not min_bundle_input:
                 break
             try:
@@ -150,7 +156,9 @@ class Project:
                     print("Min bundle size must be greater than 0. Please try again.")
                     continue
                 if min_bundle_size >= self.config["bundle_size"]:
-                    print(f"Min bundle size ({min_bundle_size}) must be less than bundle size ({self.config['bundle_size']}). Please try again.")
+                    print(
+                        f"Min bundle size ({min_bundle_size}) must be less than bundle size ({self.config['bundle_size']}). Please try again."
+                    )
                     continue
                 self.config["min_bundle_size"] = min_bundle_size
                 break
@@ -159,14 +167,18 @@ class Project:
 
         # Final validation to ensure min_bundle_size < bundle_size
         if self.config["min_bundle_size"] >= self.config["bundle_size"]:
-            print(f"\nWarning: Min bundle size ({self.config['min_bundle_size']}) must be less than bundle size ({self.config['bundle_size']}).")
+            print(
+                f"\nWarning: Min bundle size ({self.config['min_bundle_size']}) must be less than bundle size ({self.config['bundle_size']})."
+            )
             print("Please re-enter these values:")
-            
+
             # Re-prompt for bundle size
             while True:
-                bundle_input = input(f"Bundle size [{self.config['bundle_size']}]: ").strip()
+                bundle_input = input(
+                    f"Bundle size [{self.config['bundle_size']}]: "
+                ).strip()
                 if not bundle_input:
-                    bundle_input = str(self.config['bundle_size'])
+                    bundle_input = str(self.config["bundle_size"])
                 try:
                     bundle_size = int(bundle_input)
                     if bundle_size <= 0:
@@ -176,17 +188,23 @@ class Project:
                     break
                 except ValueError:
                     print("Invalid number. Please enter a valid integer.")
-            
+
             # Re-prompt for min bundle size
             while True:
-                min_bundle_input = input(f"Min bundle size [must be less than {self.config['bundle_size']}]: ").strip()
+                min_bundle_input = input(
+                    f"Min bundle size [must be less than {self.config['bundle_size']}]: "
+                ).strip()
                 try:
                     min_bundle_size = int(min_bundle_input)
                     if min_bundle_size <= 0:
-                        print("Min bundle size must be greater than 0. Please try again.")
+                        print(
+                            "Min bundle size must be greater than 0. Please try again."
+                        )
                         continue
                     if min_bundle_size >= self.config["bundle_size"]:
-                        print(f"Min bundle size ({min_bundle_size}) must be less than bundle size ({self.config['bundle_size']}). Please try again.")
+                        print(
+                            f"Min bundle size ({min_bundle_size}) must be less than bundle size ({self.config['bundle_size']}). Please try again."
+                        )
                         continue
                     self.config["min_bundle_size"] = min_bundle_size
                     break

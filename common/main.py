@@ -33,46 +33,47 @@ from common.project import set_current_project, get_project
 
 load_dotenv()
 
+
 def main():
     global options
     options = docopt(__doc__)
 
-    loglevel = 'INFO'
+    loglevel = "INFO"
     ic.disable()
-    if options['--debug']:
+    if options["--debug"]:
         ic.enable()
-        loglevel = 'DEBUG'
+        loglevel = "DEBUG"
 
-    logging.basicConfig(
-        level=loglevel,
-        format='%(levelname)s: %(message)s'
-    )
+    logging.basicConfig(level=loglevel, format="%(levelname)s: %(message)s")
 
     # Handle 'work on <project>' command
-    if options.get('work') and options.get('on') and options.get('<project>'):
-        set_current_project(options['<project>'])
+    if options.get("work") and options.get("on") and options.get("<project>"):
+        set_current_project(options["<project>"])
         print(f"Now working on project: {options['<project>']}")
         return
 
     # Handle 'configure' command
-    if options.get('configure'):
+    if options.get("configure"):
         project = get_project()
         project.prompt_for_config()
         print("Project configuration updated.")
         return
 
     # Handle 'summary' command
-    if options.get('summary'):
+    if options.get("summary"):
         from common.summary import run_summary_command
+
         run_summary_command()
         return
 
     print(options)
 
 
-class CommandError(Exception): pass
+class CommandError(Exception):
+    pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         sys.exit(main())
     except CommandError as e:

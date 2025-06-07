@@ -35,12 +35,15 @@ dependencies = [
   "Pillow<10.0",
   "usaddress",
   "scipy (>=1.11)",
-  "pytest",
   "fuzzywuzzy[speedup]>=0.18.0",
   "face_recognition",
   "face-recognition-models @ git+https://github.com/ageitgey/face_recognition_models.git",
   "setuptools<81",
 ]
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+pytest = "*"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -53,3 +56,20 @@ ab-project = "common.main:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''

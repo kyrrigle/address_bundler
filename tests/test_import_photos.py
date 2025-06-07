@@ -8,71 +8,71 @@ from lawn_signs.import_photos import (
     parse_student_name,
     is_blank_row,
     generate_unique_filename,
-    process_photo
+    process_photo,
 )
 
 
 class TestImportPhotos(unittest.TestCase):
-    
+
     def test_parse_student_name(self):
         """Test parsing of student names."""
         # Normal case
         first, last = parse_student_name("John Doe")
         self.assertEqual(first, "John")
         self.assertEqual(last, "Doe")
-        
+
         # Multiple last names
         first, last = parse_student_name("Mary Jane Smith")
         self.assertEqual(first, "Mary")
         self.assertEqual(last, "Jane Smith")
-        
+
         # Single name
         first, last = parse_student_name("Madonna")
         self.assertEqual(first, "Madonna")
         self.assertEqual(last, "")
-        
+
         # Empty name
         first, last = parse_student_name("")
         self.assertEqual(first, "")
         self.assertEqual(last, "")
-    
+
     def test_is_blank_row(self):
         """Test detection of blank rows."""
         # Completely blank row
         self.assertTrue(is_blank_row({"Name": "", "Filename": ""}))
-        
+
         # Row with whitespace only
         self.assertTrue(is_blank_row({"Name": "  ", "Filename": "\t"}))
-        
+
         # Row with data
         self.assertFalse(is_blank_row({"Name": "John", "Filename": ""}))
-        
+
         # Row with filename only
         self.assertFalse(is_blank_row({"Name": "", "Filename": "photo.jpg"}))
-    
+
     def test_generate_unique_filename(self):
         """Test unique filename generation."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # No existing file
             unique = generate_unique_filename("test.jpg", temp_dir)
             self.assertEqual(unique, "test.jpg")
-            
+
             # Create the file
-            with open(os.path.join(temp_dir, "test.jpg"), 'w') as f:
+            with open(os.path.join(temp_dir, "test.jpg"), "w") as f:
                 f.write("test")
-            
+
             # Should generate unique name
             unique = generate_unique_filename("test.jpg", temp_dir)
             self.assertEqual(unique, "test_1.jpg")
-            
+
             # Create that one too
-            with open(os.path.join(temp_dir, "test_1.jpg"), 'w') as f:
+            with open(os.path.join(temp_dir, "test_1.jpg"), "w") as f:
                 f.write("test")
-            
+
             # Should generate another unique name
             unique = generate_unique_filename("test.jpg", temp_dir)
             self.assertEqual(unique, "test_2.jpg")
-    
+
     def test_process_photo(self):
         """Test photo processing and copying."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -81,19 +81,19 @@ class TestImportPhotos(unittest.TestCase):
             dest_dir = os.path.join(temp_dir, "dest")
             os.makedirs(source_dir)
             os.makedirs(dest_dir)
-            
+
             # Create a test photo
             source_photo = os.path.join(source_dir, "test.jpg")
-            with open(source_photo, 'w') as f:
+            with open(source_photo, "w") as f:
                 f.write("test photo content")
-            
+
             # Process the photo
             result = process_photo("test.jpg", source_dir, dest_dir)
-            
+
             # Check result
             self.assertEqual(result, "test.jpg")
             self.assertTrue(os.path.exists(os.path.join(dest_dir, "test.jpg")))
-            
+
             # Test with non-existent file
             result = process_photo("missing.jpg", source_dir, dest_dir)
             self.assertIsNone(result)
@@ -139,5 +139,5 @@ class TestImportPhotos(unittest.TestCase):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

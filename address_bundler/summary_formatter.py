@@ -43,11 +43,12 @@ NO = "No"
 MISSING = "(missing)"
 UNKNOWN = "Unknown"
 
+
 def print_project_summary(
     summary: Dict[str, Any],
     max_town_rows: int = MAX_TOWN_ROWS,
     section_divider: str = SECTION_DIVIDER,
-    project: Optional[Any] = None
+    project: Optional[Any] = None,
 ) -> None:
     """
     Print a visually organized, parameterized project summary to the screen.
@@ -58,12 +59,15 @@ def print_project_summary(
         summary,
         max_town_rows=max_town_rows,
         section_divider=section_divider,
-        project=project
+        project=project,
     )
     for line in lines:
         print(line)
 
-def _print_town_histogram(histogram: Optional[Dict[str, int]], max_rows: int = MAX_TOWN_ROWS) -> None:
+
+def _print_town_histogram(
+    histogram: Optional[Dict[str, int]], max_rows: int = MAX_TOWN_ROWS
+) -> None:
     """
     Print a histogram of towns, sorted by count descending, truncating if too many towns.
     """
@@ -71,8 +75,7 @@ def _print_town_histogram(histogram: Optional[Dict[str, int]], max_rows: int = M
         print(f"  {MISSING}")
         return
     sorted_items = sorted(
-        histogram.items(),
-        key=lambda x: (-x[1], str(x[0]) if x[0] is not None else "")
+        histogram.items(), key=lambda x: (-x[1], str(x[0]) if x[0] is not None else "")
     )
     total_towns = len(sorted_items)
     for i, (town, count) in enumerate(sorted_items):
@@ -81,12 +84,13 @@ def _print_town_histogram(histogram: Optional[Dict[str, int]], max_rows: int = M
             break
         print(f"  {town or UNKNOWN}: {count}")
 
+
 # For independent testability
 def get_project_summary_lines(
     summary: Dict[str, Any],
     max_town_rows: int = MAX_TOWN_ROWS,
     section_divider: str = SECTION_DIVIDER,
-    project: Optional[Any] = None
+    project: Optional[Any] = None,
 ) -> List[str]:
     """
     Return the summary as a list of lines (for testing or alternative output).
@@ -141,7 +145,9 @@ def get_project_summary_lines(
     # Town histogram
     lines.append("")
     lines.append("Towns in addresses:")
-    lines.extend(_get_town_histogram_lines(summary.get("town_histogram"), max_rows=max_town_rows))
+    lines.extend(
+        _get_town_histogram_lines(summary.get("town_histogram"), max_rows=max_town_rows)
+    )
 
     # Geocoded count
     num_geocoded = summary.get("num_geocoded")
@@ -155,28 +161,36 @@ def get_project_summary_lines(
 
     # Clustering status
     clustering_run = summary.get("clustering_run")
-    lines.append(f"Clustering run: {YES if clustering_run else NO if clustering_run is not None else MISSING}")
+    lines.append(
+        f"Clustering run: {YES if clustering_run else NO if clustering_run is not None else MISSING}"
+    )
 
     # Maps generated
     maps_generated = summary.get("maps_generated")
-    lines.append(f"Maps generated: {YES if maps_generated else NO if maps_generated is not None else MISSING}")
+    lines.append(
+        f"Maps generated: {YES if maps_generated else NO if maps_generated is not None else MISSING}"
+    )
 
     # PDFs generated
     pdfs_generated = summary.get("pdfs_generated")
-    lines.append(f"PDFs generated: {YES if pdfs_generated else NO if pdfs_generated is not None else MISSING}")
+    lines.append(
+        f"PDFs generated: {YES if pdfs_generated else NO if pdfs_generated is not None else MISSING}"
+    )
 
     lines.append(section_divider)
     return lines
 
-def _get_town_histogram_lines(histogram: Optional[Dict[str, int]], max_rows: int = MAX_TOWN_ROWS) -> List[str]:
+
+def _get_town_histogram_lines(
+    histogram: Optional[Dict[str, int]], max_rows: int = MAX_TOWN_ROWS
+) -> List[str]:
     """
     Return the histogram of towns as a list of lines.
     """
     if not histogram:
         return [f"  {MISSING}"]
     sorted_items = sorted(
-        histogram.items(),
-        key=lambda x: (-x[1], str(x[0]) if x[0] is not None else "")
+        histogram.items(), key=lambda x: (-x[1], str(x[0]) if x[0] is not None else "")
     )
     total_towns = len(sorted_items)
     lines = []
@@ -187,12 +201,25 @@ def _get_town_histogram_lines(histogram: Optional[Dict[str, int]], max_rows: int
         lines.append(f"  {town or UNKNOWN}: {count}")
     return lines
 
+
 # Example test
 if __name__ == "__main__":
     # Example with all fields
     summary_data = {
         "num_students": 120,
-        "town_histogram": {"Milton": 80, "Quincy": 20, "Boston": 10, "Unknown": 10, "Weymouth": 5, "Dedham": 3, "Canton": 2, "Braintree": 2, "Randolph": 1, "Newton": 1, "Cambridge": 1},
+        "town_histogram": {
+            "Milton": 80,
+            "Quincy": 20,
+            "Boston": 10,
+            "Unknown": 10,
+            "Weymouth": 5,
+            "Dedham": 3,
+            "Canton": 2,
+            "Braintree": 2,
+            "Randolph": 1,
+            "Newton": 1,
+            "Cambridge": 1,
+        },
         "num_geocoded": 110,
         "num_students_total": 120,
         "clustering_run": True,
@@ -202,7 +229,7 @@ if __name__ == "__main__":
     print_project_summary(summary_data)
 
     # Example with missing/partial data
-    print("\n" + "="*40 + "\n")
+    print("\n" + "=" * 40 + "\n")
     summary_data_partial = {
         "num_students": None,
         "town_histogram": None,

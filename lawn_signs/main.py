@@ -33,32 +33,39 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def main():
     options = docopt(__doc__)
 
-    if options['summary']:
+    if options["summary"]:
         from .summary import run_summary_command
+
         run_summary_command()
         return
-    
-    if options['validate']:
-        min_resolution = int(options['--min-resolution'])
+
+    if options["validate"]:
+        min_resolution = int(options["--min-resolution"])
         from .validate import validate_student_images
+
         validate_student_images(min_resolution)
         return
-    
-    if options['import'] and options['<csv-file>'] and options['<photos-directory>']:
-        csv_file = options['<csv-file>']
-        photos_directory = options['<photos-directory>']
-        name_column = options['--name-column']
-        filename_column = options['--filename-column']
-        fuzzy_threshold = int(options['--fuzzy-threshold'])
-        
+
+    if options["import"] and options["<csv-file>"] and options["<photos-directory>"]:
+        csv_file = options["<csv-file>"]
+        photos_directory = options["<photos-directory>"]
+        name_column = options["--name-column"]
+        filename_column = options["--filename-column"]
+        fuzzy_threshold = int(options["--fuzzy-threshold"])
+
         from .import_photos import import_photos
-        import_photos(csv_file, photos_directory, name_column, filename_column, fuzzy_threshold)
+
+        import_photos(
+            csv_file, photos_directory, name_column, filename_column, fuzzy_threshold
+        )
         return
 
     print(options)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

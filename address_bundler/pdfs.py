@@ -26,12 +26,17 @@ from common.project import get_project
 from .maps import _safe_filename  # reuse internal helper
 
 
-pdfmetrics.registerFont(TTFont('Symbola', os.path.join(os.path.dirname(__file__), 'resources/Symbola.ttf')))
+pdfmetrics.registerFont(
+    TTFont("Symbola", os.path.join(os.path.dirname(__file__), "resources/Symbola.ttf"))
+)
+
 
 # --------------------------------------------------------------------------- #
 # Internal helpers
 # --------------------------------------------------------------------------- #
-def _draw_image(c: canvas.Canvas, img_path: str, margin: float, max_height: float) -> float:
+def _draw_image(
+    c: canvas.Canvas, img_path: str, margin: float, max_height: float
+) -> float:
     """Draw *img_path* centred on the current page.
 
     Returns the vertical space used (height).  If the file is missing,
@@ -42,6 +47,7 @@ def _draw_image(c: canvas.Canvas, img_path: str, margin: float, max_height: floa
 
     try:
         from PIL import Image as PILImage  # type: ignore
+
         iw, ih = PILImage.open(img_path).size
     except Exception:
         iw = ih = 0  # fallback square if PIL missing/unreadable
@@ -136,7 +142,7 @@ def _draw_bundle_table(
             c.setFont("Helvetica", 12)
 
         # Draw empty check-boxes using a Unicode character for better alignment
-        c.setFont('Symbola', 12)
+        c.setFont("Symbola", 12)
         c.drawString(x_sorted, y, "☐")
         c.drawString(x_delivered, y, "☐")
 

@@ -28,18 +28,22 @@ import csv
 
 load_dotenv()
 
+
 def main():
     global options
     options = docopt(__doc__)
 
     ic.disable()
-    if options['--debug']:
+    if options["--debug"]:
         ic.enable()
 
-    filename = options['<file>']
+    filename = options["<file>"]
     basename = os.path.splitext(os.path.basename(filename))[0]
 
-    with pdfplumber.open(filename) as pdf, open(f"{basename}.csv", "w", newline='') as f:
+    with (
+        pdfplumber.open(filename) as pdf,
+        open(f"{basename}.csv", "w", newline="") as f,
+    ):
         writer = csv.writer(f)
         for page in pdf.pages:
             table = page.extract_table()
@@ -47,9 +51,12 @@ def main():
                 for row in table:
                     writer.writerow(row)
 
-class CommandError(Exception): pass
 
-if __name__ == '__main__':
+class CommandError(Exception):
+    pass
+
+
+if __name__ == "__main__":
     try:
         sys.exit(main())
     except CommandError as e:
