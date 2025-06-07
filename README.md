@@ -24,6 +24,34 @@ A CLI tool for organizing, geocoding, and bundling addresses for efficient deliv
 - Python 3.10 or higher
 - pip
 
+### System Dependencies
+
+For the auto-crop feature (lawn signs), additional system dependencies are required:
+
+- **dlib**: Computer vision library for face detection
+- **cmake**: Build system required for dlib compilation
+
+**Installation on macOS:**
+
+```
+brew install cmake dlib
+```
+
+**Installation on Ubuntu/Debian:**
+
+```
+sudo apt-get update
+sudo apt-get install build-essential cmake libopenblas-dev liblapack-dev
+sudo apt-get install libx11-dev libgtk-3-dev python3-dev
+```
+
+**Installation on Windows:**
+- Install Visual Studio Build Tools
+- Install cmake from https://cmake.org/download/
+- dlib will be compiled automatically during pip installation
+
+Note: The face_recognition library depends on dlib, which requires compilation. On some systems, this may take several minutes during installation.
+
 ---
 
 ## Installation
@@ -171,4 +199,3 @@ After the final step you’ll find:
 * `master.pdf` – the master roster
 * `bundle_<letter>.png` – zoomed maps for each bundle
 * `bundle_<letter>.pdf` – an address sheet for each delivery bundle
-
