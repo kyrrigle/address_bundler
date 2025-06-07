@@ -9,12 +9,11 @@ Usage:
 Options:
     --help -h             Print this message
     --debug               Debug logging
-    --projects-root DIR   Projects directory [default: ./projects]
 
 Description:
 
 work on <project>
-    Switch to or create a new project in the --projects-root folder. If creating a
+    Switch to or create a new project. If creating a
     new project you will be prompted for options.
 
 configure
@@ -30,7 +29,7 @@ import logging
 from docopt import docopt
 from icecream import ic
 from dotenv import load_dotenv
-from common.project import initialize_projects, set_current_project, get_project
+from common.project import set_current_project, get_project
 
 load_dotenv()
 
@@ -48,8 +47,6 @@ def main():
         level=loglevel,
         format='%(levelname)s: %(message)s'
     )
-
-    initialize_projects(options['--projects-root'])
 
     # Handle 'work on <project>' command
     if options.get('work') and options.get('on') and options.get('<project>'):

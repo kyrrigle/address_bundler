@@ -108,10 +108,9 @@ Usage:
 Options:
     --help -h             Print this message
     --debug               Debug logging
-    --projects-root DIR   Projects directory [default: ./projects]
 
 Commands
-work on <project>   Create / switch to a project inside --projects-root  
+work on <project>   Create / switch to a project  
 configure           Interactive re-configuration of the current project  
 import <file>       Import student CSV (requires “First Name”, “Last Name”, “Address”)  
 geocode             Look up lat/long for any un-geocoded addresses  

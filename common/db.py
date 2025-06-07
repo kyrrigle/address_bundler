@@ -1,8 +1,7 @@
-from peewee import SqliteDatabase
+from peewee import SqliteDatabase, Proxy
 
-db = None  # Will be set dynamically
+db = Proxy()  # Use a Proxy for deferred initialization
 
 def init_db(db_path):
-    global db
-    db = SqliteDatabase(db_path)
+    db.initialize(SqliteDatabase(db_path))
     return db

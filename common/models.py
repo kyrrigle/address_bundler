@@ -14,6 +14,7 @@ class Student(BaseModel):
     latitude = FloatField(null=True)
     longitude = FloatField(null=True)
     bundle_key = CharField(null=True)
+    image_name = CharField(null=True)
 
     class Meta:
         table_name = "student"

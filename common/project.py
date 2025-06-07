@@ -8,17 +8,19 @@ _project = None  # Will hold the current Project instance or None
 
 def get_project():
     if _project is None:
+        initialize_projects()
+    if _project is None:
         raise RuntimeError("Project has not been set")
     return _project
 
 
-def initialize_projects(root_dir):
+def initialize_projects():
     """
-    Set the global projects root directory and load the current project from
-    .current-project if it exists.
+    Set the global projects root directory from the AB_PROJECTS_FOLDER environment variable,
+    or use ./projects if not set. Load the current project from .current-project if it exists.
     """
     global _projects_root, _project
-    _projects_root = root_dir
+    _projects_root = os.environ.get("AB_PROJECTS_FOLDER", "./projects")
     current_project_file = os.path.join(_projects_root, ".current-project")
     if os.path.exists(current_project_file):
         with open(current_project_file, "r") as f:
@@ -40,6 +42,7 @@ def set_current_project(name):
     .current-project. Also builds DB and ensures configuration.
     """
     global _project
+    initialize_projects()
     os.makedirs(os.path.join(_projects_root, name), exist_ok=True)
     current_project_file = os.path.join(_projects_root, ".current-project")
     with open(current_project_file, "w") as f:

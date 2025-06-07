@@ -2,12 +2,20 @@
 
 """
 Usage:
+    ab-signs import <csv-file> <photos-directory> [--name-column NAME] [--filename-column NAME]  [--fuzzy-threshold SCORE]
     ab-signs summary
 
 Options:
-    --help -h   Show this help message
+    --help -h                Show this help message
+    --name-column NAME       Column to use for student name when importing [default: Name]
+    --filename-column NAME   Column to use for filename when importing [default: Filename]
+    --fuzzy-threshold SCORE  How close of a match to determine fuzzy name matching [default: 80]
 
 Description:
+
+import
+    Import students and their photos from the csv file and directory.   Can be run multiple
+    times.  If a new photo is included it will replace the existing
 
 summary
     Prints a summary of the lawn signs project.
@@ -15,13 +23,27 @@ summary
 
 import sys
 from docopt import docopt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def main():
     options = docopt(__doc__)
 
-    if options.get('summary'):
+    if options['summary']:
         from .summary import run_summary_command
         run_summary_command()
+        return
+    
+    if options['import'] and options['<csv-file>'] and options['<photos-directory>']:
+        csv_file = options['<csv-file>']
+        photos_directory = options['<photos-directory>']
+        name_column = options['--name-column']
+        filename_column = options['--filename-column']
+        fuzzy_threshold = int(options['--fuzzy-threshold'])
+        
+        from .import_photos import import_photos
+        import_photos(csv_file, photos_directory, name_column, filename_column, fuzzy_threshold)
         return
 
     print(options)
