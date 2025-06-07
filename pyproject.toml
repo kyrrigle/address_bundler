@@ -43,8 +43,9 @@ where = ["."]
 exclude = ["tests*"]
 
 [project.scripts]
-ab = "address_bundler.main:main"
-address-bundler = "address_bundler.main:main"
+ab-bundle = "address_bundler.main:main"
+ab-signs = "lawn_signs.main:main"
+ab-project = "common.main:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

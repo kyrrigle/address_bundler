@@ -7,8 +7,8 @@ from typing import Dict, List
 
 import staticmaps
 
-from .models import Student
-from .project import get_project
+from common.models import Student
+from common.project import get_project
 
 
 # --------------------------------------------------------------------------- #
@@ -102,9 +102,9 @@ def generate_maps(width: int = 1200, height: int = 800) -> None:
     # Determine output directory
     try:
         project = get_project()
-        output_dir = project.get_directory()
+        output_dir = os.path.join(project.get_directory(), "output", "bundles")
     except Exception:
-        output_dir = os.getcwd()
+        output_dir = os.path.join(os.getcwd(), "output", "bundles")
 
     os.makedirs(output_dir, exist_ok=True)
     master_path = os.path.join(output_dir, "master.png")

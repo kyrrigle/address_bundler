@@ -21,8 +21,8 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-from .models import Student
-from .project import get_project
+from common.models import Student
+from common.project import get_project
 from .maps import _safe_filename  # reuse internal helper
 
 
@@ -169,9 +169,9 @@ def generate_pdfs() -> None:
     # Output directory (where the PNGs already reside)
     try:
         project = get_project()
-        output_dir = project.get_directory()
+        output_dir = os.path.join(project.get_directory(), "output", "bundles")
     except Exception:
-        output_dir = os.getcwd()
+        output_dir = os.path.join(os.getcwd(), "output", "bundles")
     os.makedirs(output_dir, exist_ok=True)
 
     margin = 0.5 * inch

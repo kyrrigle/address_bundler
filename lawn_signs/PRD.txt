@@ -1,0 +1,47 @@
+# Project Requirements Document (PRD)
+
+## Project Overview
+This project is a command line tool to process student portrait images and create print-ready PDF files using a configurable design template. 
+The tool will allow users to input a batch of student portraits, apply a design template, and output high-quality PDFs suitable for printing class signs.
+This tool will form the backend functionality for a bespoke paid service.   Schools (or PTOs) will be the customers.
+
+## Features
+- Validation of student portrait images for file reability and minimum resolution requirements
+- Batch processing of student portrait images
+- Images will be auto-cropped to fit the template specification.
+- Image cropping will use facial recognition to keep the subject centered in the cropped image.
+- Support for multiple image formats (JPEG, PNG, etc.)
+- Configurable design templates for layout and styling
+- Templates will be PDF files with corresponding json metadata specifying slots to be filled (photo, name, year, etc)
+- Output print-ready PDF files
+- Command line interface with clear options and flags
+- Error handling and logging for processing issues
+- Support for custom fonts and colors in templates
+- Support for multiple projects with the ability to switch between projects.
+- Each project's resources should will be kept in a separate directory
+
+## User Stories
+- As a user, I want to create a new project
+- As a user, I want to be able to configure a project to use a particular design template.
+- As a user, I want to generate class signs quickly from student photos
+- As a user, I want to be able to add new design templates for use.
+- As a user, I want to process large batches of images efficiently to save time.
+- As a user, I want to create a PDF "proof" which has multiple small images per page that can be delivered to the customer for review
+- As a user, I want to be able to replace an image for a particular student
+- As a user, I want to be able to create final deliverable PDF files.  These will have one sign per page, full resolution.  Configurable max number of pages per file.
+
+## Technical Requirements
+- Implemented in Python for cross-platform compatibility
+- One command line entrypoint called `cs` which uses the docopt library for command line parsing
+- Use of image processing libraries (e.g., Pillow)
+- Use of PDF generation libraries (e.g., ReportLab)
+- Configuration files for design templates (YAML or JSON)
+- Unit tests for core functionality
+- CLI argument parsing with docopt
+
+## Constraints
+- Must run on macOS and Linux environments
+- Should handle at least 100 images per batch without performance degradation
+
+## Future Enhancements
+- GUI for template design and preview

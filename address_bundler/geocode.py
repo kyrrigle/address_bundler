@@ -24,7 +24,7 @@ from geopy.exc import (
 )
 from geopy.geocoders import Nominatim
 
-from .models import Student
+from common.models import Student
 
 logger = logging.getLogger(__name__)
 

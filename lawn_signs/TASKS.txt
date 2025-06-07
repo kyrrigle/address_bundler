@@ -1,0 +1,53 @@
+# TASKS for Lawn Signs Project
+
+## 1. Project Setup
+- Set up Python project structure for CLI tool
+- Configure project for cross-platform compatibility (macOS, Linux)
+- Add dependencies: Pillow, ReportLab, docopt, facial recognition library
+
+## 2. Command Line Interface (CLI)
+- Implement single entrypoint script `cs` using docopt
+- Define CLI commands and options for all major features
+
+## 3. Project Management
+- Implement functionality to create new projects
+- Support switching between projects and maintaining separate resource directories
+
+## 4. Template Management
+- Support adding and configuring design templates (PDF + JSON/YAML metadata)
+- Implement logic to select and apply templates per project
+- Support custom fonts and colors in templates
+
+## 5. Image Processing
+- Validate student portrait images for readability and minimum resolution
+- Support multiple image formats (JPEG, PNG, etc.)
+- Batch process images efficiently (≥100 per batch)
+- Auto-crop images to fit template slots using facial recognition
+- Center subject in cropped image
+
+## 6. PDF Generation
+- Generate print-ready PDF files with one sign per page (full resolution)
+- Support configurable max number of pages per output file
+- Generate PDF "proof" with multiple small images per page for review
+
+## 7. User Operations
+- Allow replacing an image for a particular student
+- Allow configuring a project to use a specific template
+
+## 8. Error Handling & Logging
+- Implement robust error handling for all processing steps
+- Add logging for processing issues and user actions
+
+## 9. Configuration
+- Support configuration files for templates (YAML/JSON)
+- Allow per-project configuration
+
+## 10. Testing
+- Write unit tests for core functionality (image validation, cropping, PDF generation, CLI)
+- Ensure batch processing performance and reliability
+
+## 11. Documentation
+- Document CLI usage, configuration, and template creation
+
+## 12. Future Enhancements (for reference)
+- Plan for GUI for template design and preview (not in initial scope)

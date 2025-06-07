@@ -3,7 +3,7 @@ from collections import Counter
 from typing import List, Dict, Any
 import usaddress
 
-from .models import Student
+from common.models import Student
 
 
 def compute_town_histogram(students: List[Student]) -> Dict[str, int]:
@@ -75,12 +75,11 @@ def detect_clustering_run(students: List[Student]) -> bool:
 def detect_maps_generated(project) -> bool:
     """
     Returns True if map output files exist in the project directory.
-    Looks for 'master.png' in the project directory or 'output' subdirectory.
+    Looks for 'master.png' in the 'output/bundles' subdirectory.
     """
     project_dir = project.get_directory()
     candidates = [
-        os.path.join(project_dir, "master.png"),
-        os.path.join(project_dir, "output", "master.png"),
+        os.path.join(project_dir, "output", "bundles", "master.png"),
     ]
     for path in candidates:
         if os.path.exists(path):
@@ -91,14 +90,40 @@ def detect_maps_generated(project) -> bool:
 def detect_pdfs_generated(project) -> bool:
     """
     Returns True if PDF output files exist in the project directory.
-    Looks for 'master.pdf' in the project directory or 'output' subdirectory.
+    Looks for 'master.pdf' in the 'output/bundles' subdirectory.
     """
     project_dir = project.get_directory()
     candidates = [
-        os.path.join(project_dir, "master.pdf"),
-        os.path.join(project_dir, "output", "master.pdf"),
+        os.path.join(project_dir, "output", "bundles", "master.pdf"),
     ]
     for path in candidates:
         if os.path.exists(path):
             return True
     return False
+
+def run_summary_command():
+    """
+    Runs the summary command logic, printing a summary of the current project.
+    """
+    from common.project import get_project
+    from .summary_formatter import print_project_summary
+    from common.models import Student
+
+    project = get_project()
+    students = list(Student.select())
+    num_students = len(students)
+    town_histogram = compute_town_histogram(students) if num_students > 0 else None
+    num_geocoded = sum(1 for s in students if is_geocoded(s)) if num_students > 0 else None
+    clustering_run = detect_clustering_run(students) if num_students > 0 else None
+    maps_generated = detect_maps_generated(project)
+    pdfs_generated = detect_pdfs_generated(project)
+    summary_data = {
+        "num_students": num_students if num_students > 0 else None,
+        "town_histogram": town_histogram,
+        "num_geocoded": num_geocoded,
+        "num_students_total": num_students if num_students > 0 else None,
+        "clustering_run": clustering_run,
+        "maps_generated": maps_generated,
+        "pdfs_generated": pdfs_generated,
+    }
+    print_project_summary(summary_data, project=project)

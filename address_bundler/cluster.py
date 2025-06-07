@@ -8,8 +8,8 @@ from typing import Dict, List
 import numpy as np
 from sklearn.cluster import KMeans
 
-from .models import Student
-from .project import get_project
+from common.models import Student
+from common.project import get_project
 
 # ---------------------------------------------------------------------- #
 # Helper functions

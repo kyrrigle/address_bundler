@@ -1,5 +1,5 @@
 import csv
-from .models import Student
+from common.models import Student
 
 REQUIRED_COLUMNS = ["First Name", "Last Name", "Address"]
 

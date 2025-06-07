@@ -63,7 +63,7 @@ import logging
 from docopt import docopt
 from icecream import ic
 from dotenv import load_dotenv
-from .project import initialize_projects, set_current_project, get_project
+from common.project import initialize_projects, set_current_project, get_project
 
 load_dotenv()
 
@@ -145,27 +145,8 @@ def main():
 
     # Handle 'summary' command
     if options.get('summary'):
-        from .summary import compute_town_histogram, is_geocoded, detect_clustering_run, detect_maps_generated, detect_pdfs_generated
-        from .models import Student
-        from .summary_formatter import print_project_summary
-        project = get_project()
-        students = list(Student.select())
-        num_students = len(students)
-        town_histogram = compute_town_histogram(students) if num_students > 0 else None
-        num_geocoded = sum(1 for s in students if is_geocoded(s)) if num_students > 0 else None
-        clustering_run = detect_clustering_run(students) if num_students > 0 else None
-        maps_generated = detect_maps_generated(project)
-        pdfs_generated = detect_pdfs_generated(project)
-        summary_data = {
-            "num_students": num_students if num_students > 0 else None,
-            "town_histogram": town_histogram,
-            "num_geocoded": num_geocoded,
-            "num_students_total": num_students if num_students > 0 else None,
-            "clustering_run": clustering_run,
-            "maps_generated": maps_generated,
-            "pdfs_generated": pdfs_generated,
-        }
-        print_project_summary(summary_data, project=project)
+        from .summary import run_summary_command
+        run_summary_command()
         return
 
     print(options)

@@ -94,7 +94,7 @@ def get_project_summary_lines(
     """
     lines = []
     lines.append(section_divider)
-    lines.append("PROJECT SUMMARY")
+    lines.append("BUNDLER SUMMARY")
     lines.append(section_divider)
 
     # Project configuration section

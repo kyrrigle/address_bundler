@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .models import Student
+from common.models import Student
 
 
 def fix_addresses():
