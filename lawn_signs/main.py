@@ -5,6 +5,7 @@ Usage:
     ab-signs import <csv-file> <photos-directory> [--name-column NAME] [--filename-column NAME]  [--fuzzy-threshold SCORE]
     ab-signs summary
     ab-signs validate [--min-resolution PIXELS]
+    ab-signs auto-crop [--aspect-ratio RATIO]
 
 Options:
     --help -h                Show this help message
@@ -12,6 +13,7 @@ Options:
     --filename-column NAME   Column to use for filename when importing [default: Filename]
     --fuzzy-threshold SCORE  How close of a match to determine fuzzy name matching [default: 80]
     --min-resolution PIXELS  Minimum total pixels required for valid images [default: 1000000]
+    --aspect-ratio RATIO     Aspect ratio for cropping photos [default: 0.8]
 
 Description:
 
@@ -25,6 +27,10 @@ summary
 validate
     Validate original photos to meet specific constraints (readable image file, minimum resolution).
     Updates student records with validation status.
+
+auto-crop
+    Automatically crop student photos using face detection and fallback logic.
+    Cropped images are saved to the cropped directory. Supports aspect ratio selection.
 """
 
 import sys
@@ -64,7 +70,17 @@ def main():
         )
         return
 
+    # Handle auto-crop command and parse --aspect-ratio parameter
+    if options.get("auto-crop"):
+        aspect_ratio = float(options["--aspect-ratio"])
+        from .auto_crop import auto_crop_command
+
+        auto_crop_command(aspect_ratio)
+        return
+
+    print("Command not handled")
     print(options)
+    return 1
 
 
 if __name__ == "__main__":

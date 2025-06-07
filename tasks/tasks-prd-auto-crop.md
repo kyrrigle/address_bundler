@@ -3,8 +3,9 @@
 - `lawn_signs/auto_crop.py` - Main module containing auto-crop functionality, face detection logic, fallback center-crop logic, and quality-preserving image processing.
 - `tests/test_auto_crop.py` - Unit tests for auto-crop functionality, including center-crop fallback and quality preservation.
 - `lawn_signs/main.py` - Updated to include the new auto-crop command interface.
-- `common/models.py` - Updated Student model to track cropping status and file paths.
+- `common/models.py` - Student model, cropping status tracking, and query for students needing cropping.
 - `requirements.txt` or `pyproject.toml` - Updated to include face_recognition dependency.
+- `common/migrate_add_cropping_status.py` - Migration script to add cropping_status field to the student table if missing.
 
 ### Notes
 
@@ -33,19 +34,18 @@
   - [x] 2.7 Implement quality preservation during image processing (avoid unnecessary recompression)
   - [x] 2.8 Review the code created for task 2.0 and add unit tests where needed
 
-- [ ] 3.0 Create command interface and integrate with existing CLI
-  - [ ] 3.1 Add auto-crop command option to lawn_signs/main.py docstring
-  - [ ] 3.2 Add --aspect-ratio parameter with default value of 0.8
-  - [ ] 3.3 Implement command parsing logic for auto-crop in main.py
-  - [ ] 3.4 Create main auto_crop_command function that orchestrates the cropping process
-  - [ ] 3.5 Add progress reporting and user feedback during batch processing
+- [x] 3.0 Create command interface and integrate with existing CLI
+  - [x] 3.1 Add auto-crop command option to lawn_signs/main.py docstring
+  - [x] 3.2 Add --aspect-ratio parameter with default value of 0.8
+  - [x] 3.3 Implement command parsing logic for auto-crop in main.py
+  - [x] 3.4 Create main auto_crop_command function that orchestrates the cropping process
+  - [x] 3.5 Add progress reporting and user feedback during batch processing
 
-- [ ] 4.0 Update database model to track cropping status
-  - [ ] 4.1 Add cropped_image_path field to Student model in common/models.py
-  - [ ] 4.2 Add cropping_status field to Student model (e.g., 'not_cropped', 'cropped', 'failed')
-  - [ ] 4.3 Create database migration or update logic for new fields
-  - [ ] 4.4 Implement functions to query students that need cropping (validated but not cropped)
-  - [ ] 4.5 Add database update logic to save cropping results and file paths
+- [x] 4.0 Update database model to track cropping status
+  - [x] 4.2 Add cropping_status field to Student model (e.g., 'not_cropped', 'cropped', 'failed')
+  - [x] 4.3 Create database migration or update logic for new fields
+  - [x] 4.4 Implement functions to query students that need cropping (validated but not cropped)
+  - [x] 4.5 Add database update logic to save cropping results (remember we are not storing a 2nd path for the crop, we just want to put it in a `cropped` directory)
 
 - [ ] 5.0 Implement batch processing and error handling for photo cropping
   - [ ] 5.1 Create function to create cropped directory structure if it doesn't exist

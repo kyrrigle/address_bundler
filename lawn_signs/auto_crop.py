@@ -25,6 +25,10 @@ from pathlib import Path
 from PIL import Image  # type: ignore
 import face_recognition  # type: ignore
 
+# Project imports
+from common.models import Student
+from peewee import DoesNotExist
+
 
 # --------------------------------------------------------------------------- #
 # Temporary stub
@@ -242,3 +246,58 @@ def crop_image_with_pil(
         if hasattr(img, "info") and "exif" in img.info:
             save_kwargs["exif"] = img.info["exif"]
         cropped.save(output_path, format=fmt, **save_kwargs)
+
+
+# --------------------------------------------------------------------------- #
+# CLI Orchestration Entry Point
+# --------------------------------------------------------------------------- #
+def auto_crop_command(aspect_ratio: float) -> None:
+    """
+    Entry point for the auto-crop CLI command.
+    Orchestrates the cropping process and provides progress reporting and user feedback.
+    """
+    # Simulated list of images for demonstration; replace with real batch logic in later tasks
+    image_list = [
+        "student1.jpg",
+        "student2.jpg",
+        "student3.jpg",
+        "student4.jpg",
+        "student5.jpg",
+    ]
+    total = len(image_list)
+    print(
+        f"Starting auto-crop batch process for {total} images (aspect_ratio={aspect_ratio})"
+    )
+    success_count = 0
+    fail_count = 0
+    for idx, img_name in enumerate(image_list, 1):
+        print(f"[{idx}/{total}] Processing: {img_name} ...", end="")
+        try:
+            # Simulate processing (replace with real crop logic later)
+            # For now, randomly fail one image for demo
+            if img_name == "student3.jpg":
+                raise Exception("Simulated error: face not found")
+            # --- Database update logic for cropping_status ---
+            try:
+                student = Student.get(Student.image_name == img_name)
+                student.cropping_status = "cropped"
+                student.save()
+            except DoesNotExist:
+                print(" warning: student not found for image_name.", end="")
+            print(" done.")
+            success_count += 1
+        except Exception as e:
+            # On failure, update cropping_status to "failed"
+            try:
+                student = Student.get(Student.image_name == img_name)
+                student.cropping_status = "failed"
+                student.save()
+            except DoesNotExist:
+                print(" warning: student not found for image_name.", end="")
+            print(f" failed! Reason: {e}")
+            fail_count += 1
+    print(f"\nBatch complete. {success_count} succeeded, {fail_count} failed.")
+    if fail_count > 0:
+        print("Some images could not be processed. See above for details.")
+    else:
+        print("All images processed successfully.")

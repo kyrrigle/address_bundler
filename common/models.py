@@ -20,6 +20,25 @@ class Student(BaseModel):
         choices=[("unknown", "Unknown"), ("valid", "Valid"), ("invalid", "Invalid")],
         default="unknown",
     )
+    cropping_status = CharField(
+        null=False,
+        choices=[
+            ("not_cropped", "Not Cropped"),
+            ("cropped", "Cropped"),
+            ("failed", "Failed"),
+        ],
+        default="not_cropped",
+        help_text="Cropping status for student photo: not_cropped, cropped, or failed.",
+    )
+
+    @classmethod
+    def get_students_needing_cropping(cls):
+        """
+        Returns a query for students who are validated but not yet cropped.
+        """
+        return cls.select().where(
+            (cls.cropping_status == "not_cropped") & (cls.image_valid == "valid")
+        )
 
     class Meta:
         table_name = "student"
