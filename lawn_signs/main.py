@@ -7,6 +7,8 @@ Usage:
     ab-signs validate [--min-resolution PIXELS]
     ab-signs auto-crop [--aspect-ratio RATIO] [--force]
 
+IMPORTANT: Before running any commands, you must first select a project with: work on <project>
+
 Options:
     --help -h                Show this help message
     --name-column NAME       Column to use for student name when importing [default: Name]
@@ -37,12 +39,20 @@ auto-crop
 import sys
 from docopt import docopt
 from dotenv import load_dotenv
+from common.bootstrap import bootstrap_application
 
 load_dotenv()
 
 
 def main():
     options = docopt(__doc__)
+
+    # All lawn_signs commands require a project
+    try:
+        bootstrap_application(require_project=True)
+    except RuntimeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
     if options["summary"]:
         from .summary import run_summary_command

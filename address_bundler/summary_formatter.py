@@ -34,6 +34,7 @@ Example usage:
 """
 
 from typing import Dict, Any, Optional, List, Tuple
+from common.project import Project
 
 # Parameterized formatting options
 MAX_TOWN_ROWS = 10
@@ -90,7 +91,7 @@ def get_project_summary_lines(
     summary: Dict[str, Any],
     max_town_rows: int = MAX_TOWN_ROWS,
     section_divider: str = SECTION_DIVIDER,
-    project: Optional[Any] = None,
+    project: Optional[Project] = None,
 ) -> List[str]:
     """
     Return the summary as a list of lines (for testing or alternative output).
@@ -102,9 +103,7 @@ def get_project_summary_lines(
     lines.append(section_divider)
 
     # Project configuration section
-    config = None
-    if project is not None and hasattr(project, "config"):
-        config = project.config
+    config = project.get_all_config() if project else {}
 
     # School name
     school_name = None

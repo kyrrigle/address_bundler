@@ -6,6 +6,8 @@ Usage:
     ab-project [options] configure
     ab-project [options] summary
 
+IMPORTANT: Before running any commands, you must first select a project with: work on <project>
+
 Options:
     --help -h             Print this message
     --debug               Debug logging
@@ -29,7 +31,7 @@ import logging
 from docopt import docopt
 from icecream import ic
 from dotenv import load_dotenv
-from common.project import set_current_project, get_project
+from .bootstrap import bootstrap_application
 
 load_dotenv()
 
@@ -48,21 +50,27 @@ def main():
 
     # Handle 'work on <project>' command
     if options.get("work") and options.get("on") and options.get("<project>"):
-        set_current_project(options["<project>"])
-        print(f"Now working on project: {options['<project>']}")
+        project_manager, _ = bootstrap_application(require_project=False)
+        project = project_manager.set_current_project(options["<project>"])
+        print(f"Now working on project: {project.name}")
         return
+
+    # All other commands require a project
+    try:
+        project_manager, project = bootstrap_application(require_project=True)
+    except RuntimeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
     # Handle 'configure' command
     if options.get("configure"):
-        project = get_project()
         project.prompt_for_config()
         print("Project configuration updated.")
         return
 
     # Handle 'summary' command
     if options.get("summary"):
-        from common.summary import run_summary_command
-
+        from .summary import run_summary_command
         run_summary_command()
         return
 

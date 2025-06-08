@@ -2,8 +2,6 @@
 
 """
 Usage:
-    address-bundler [options] work on <project>
-    address-bundler [options] configure
     address-bundler [options] import <file>
     address-bundler [options] geocode
     address-bundler [options] fix addresses
@@ -11,18 +9,13 @@ Usage:
     address-bundler [options] generate [maps|pdfs]
     address-bundler [options] summary
 
+IMPORTANT: Before running any commands, you must first select a project with: work on <project>
+
 Options:
     --help -h             Print this message
     --debug               Debug logging
 
 Description:
-
-work on <project>
-    Switch to or create a new project.  If creating a
-    new project you will be prompted for options.
-
-configure
-    Update the project options via interactive prompting.
 
 import <file>
     Import student names and addresses from the specified file.   Only csv files
@@ -62,7 +55,7 @@ import logging
 from docopt import docopt
 from icecream import ic
 from dotenv import load_dotenv
-from common.project import set_current_project, get_project
+from common.bootstrap import bootstrap_application
 
 load_dotenv()
 
@@ -79,17 +72,17 @@ def main():
 
     logging.basicConfig(level=loglevel, format="%(levelname)s: %(message)s")
 
-    # Handle 'work on <project>' command
-    if options.get("work") and options.get("on") and options.get("<project>"):
-        set_current_project(options["<project>"])
-        print(f"Now working on project: {options['<project>']}")
-        return
+    # All lawn_signs commands require a project
+    try:
+        bootstrap_application(require_project=True)
+    except RuntimeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
     # Handle 'import <file>' command
     if options.get("import") and options.get("<file>"):
         from .import_file import import_csv_file
 
-        project = get_project()
         file_path = options["<file>"]
         if not file_path.lower().endswith(".csv"):
             raise RuntimeError("Only CSV files are supported for import.")
@@ -109,13 +102,6 @@ def main():
 
         total, succeeded = geocode_missing_students()
         print(f"Geocoded {succeeded}/{total} address(es).")
-        return
-
-    # Handle 'configure' command
-    if options.get("configure"):
-        project = get_project()
-        project.prompt_for_config()
-        print("Project configuration updated.")
         return
 
     # Handle 'fix addresses' command

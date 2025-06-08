@@ -1,5 +1,31 @@
 import pytest
 from address_bundler import summary_formatter
+from common.project import Project
+
+
+# TestProject disables DB and FS side effects for testing
+class TestProject(Project):
+    def __init__(self, name="test_project", projects_root="/tmp", config=None):
+        super().__init__(name, projects_root)
+        self._test_config = config or {}
+        self._config_cache = self._test_config.copy()
+
+    def get_config(self, key: str, default=None):
+        if key in self._test_config:
+            return self._test_config[key]
+        return super().get_config(key, default)
+
+    def get_all_config(self):
+        d = self.DEFAULT_CONFIG.copy()
+        d.update(self._test_config)
+        return d
+
+    def get_db(self):
+        return None  # Disable DB
+
+    def ensure_initialized(self):
+        pass  # Disable FS/DB setup
+
 
 SECTION_DIVIDER = "-" * 40
 
@@ -103,13 +129,11 @@ def test_independent_histogram_lines():
 def test_get_project_summary_lines_with_project_config():
     from address_bundler import summary_formatter
 
-    class DummyProject:
-        def __init__(self):
-            self.config = {
-                "school_name": "Test School",
-                "bundle_size": 42,
-                "min_bundle_size": 7,
-            }
+    config = {
+        "school_name": "Test School",
+        "bundle_size": 42,
+        "min_bundle_size": 7,
+    }
 
     summary = {
         "num_students": 10,
@@ -120,7 +144,7 @@ def test_get_project_summary_lines_with_project_config():
         "maps_generated": True,
         "pdfs_generated": False,
     }
-    project = DummyProject()
+    project = TestProject(config=config)
     lines = summary_formatter.get_project_summary_lines(summary, project=project)
     assert any("School name: Test School" in line for line in lines)
     assert any("Bundle size: 42" in line for line in lines)

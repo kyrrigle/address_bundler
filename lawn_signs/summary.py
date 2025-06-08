@@ -1,10 +1,7 @@
 from common.models import Student
-from common.project import get_project
 
 
 def run_summary_command():
-    get_project()  # initializes the project
-
     print("=" * 40)
     print("SIGNS SUMMARY")
     print("=" * 40)

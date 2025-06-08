@@ -39,13 +39,10 @@ def _print_project_information() -> None:
         except Exception:
             pass  # Ignore unexpected errors while printing directory
 
-    # Key/value pairs from project.config (if present)
-    config = getattr(project, "config", None)
-    if config:
-        for key, value in config.items():
-            print(f"{key}: {value}")
-    else:
-        print("(no project configuration)")
+    print("Configuration:")
+    config = project.get_all_config()
+    for key, value in config.items():
+        print(f" - {key}: {value}")
 
     print()  # Spacer
 
