@@ -50,7 +50,6 @@ class Project:
     def ensure_initialized(self):
         """Ensure project directory and database are set up"""
         os.makedirs(self.get_directory(), exist_ok=True)
-        print("here")
 
         # Initialize database connection
         self.get_db()

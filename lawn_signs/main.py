@@ -6,6 +6,9 @@ Usage:
     ab-signs summary
     ab-signs validate [--min-resolution PIXELS]
     ab-signs auto-crop [--aspect-ratio RATIO] [--force]
+    ab-signs render templates [--force]
+    ab-signs render template <template-path> <photo-path> <name> [<output-path>]
+    ab-signs render contact-sheet <source-directory> [<output-path>]
 
 IMPORTANT: Before running any commands, you must first select a project with: work on <project>
 
@@ -37,6 +40,7 @@ auto-crop
 """
 
 import sys
+import os
 from docopt import docopt
 from dotenv import load_dotenv
 from common.bootstrap import bootstrap_application
@@ -88,6 +92,40 @@ def main():
         from .auto_crop import auto_crop_command
 
         auto_crop_command(aspect_ratio, force)
+        return
+
+    if options["render"] and options["template"]:
+        # <template-file> <photo-path> <name>
+        template_path = options["<template-path>"]
+        photo_path = options["<photo-path>"]
+        student_name = options["<name>"]
+
+        from .template import Template, render_template
+
+        output_path = options["<output-path>"] or "output.pdf"
+        print(f"Creating {output_path}")
+        template = Template(template_path)
+        slot_values = {"photo": photo_path, "name": student_name}
+        render_template(template, slot_values, output_path)
+        return
+
+    if options["render"] and options["templates"]:
+        from .template import render_templates_command
+
+        render_templates_command(options["--force"])
+        return
+
+    #   ab-signs render contact-sheet <source-directory> [<output-path>]
+    if options["render"] and options["contact-sheet"]:
+        source_directory = options["<source-directory>"]
+        output_path = options["<output-path>"] or "contact-sheet.pdf"
+        from .template import build_contact_sheet
+
+        file_pdf_list = []
+        for name in os.listdir(source_directory):
+            file_pdf_list.append(os.path.join(source_directory, name))
+
+        build_contact_sheet(file_pdf_list, output_path)
         return
 
     print("Command not handled")

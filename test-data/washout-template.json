@@ -1,0 +1,24 @@
+{
+    "slots": {
+        "photo": {
+            "type": "image",
+            "box": {
+                "x": 1.25,
+                "y": 1.25,
+                "w": 10.50,
+                "h": 13.125
+            }
+        },
+        "name": {
+            "type": "text",
+            "font_name": "Helvetica-Bold",
+            "font_size": 64,
+            "box": {
+                "x": 1.25,
+                "y": 14.56,
+                "w": 10.50,
+                "h": 2.27
+            }
+        }
+    }
+}

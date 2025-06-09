@@ -39,6 +39,8 @@ dependencies = [
   "face_recognition",
   "face-recognition-models @ git+https://github.com/ageitgey/face_recognition_models.git",
   "setuptools<81",
+  "PyPDF2",
+  "pdf2image (>=1.17.0,<2.0.0)",
 ]
 
 [tool.poetry.group.dev.dependencies]

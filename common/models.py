@@ -41,6 +41,15 @@ class Student(BaseModel):
             & (cls.image_valid == "valid")
         )
 
+    @classmethod
+    def get_students_needing_signs(cls, force=False):
+        """
+        Returns a query for students who are validated but not yet cropped.
+        """
+        return cls.select().where(
+            (force or cls.cropping_status == "cropped") & (cls.image_valid == "valid")
+        )
+
     class Meta:
         table_name = "student"
         indexes = [(("first_name", "last_name"), True)]
